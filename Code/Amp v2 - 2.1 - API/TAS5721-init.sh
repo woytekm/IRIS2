@@ -1,13 +1,22 @@
+# /boot/config.txt:
+# dtoverlay=i2s-mmap
+# dtoverlay=rpi-dac
+#
+# Why rpi-dac and not hifiberry?
+# rpi-dac uses 64 x fs bit clock - if TAS doesn't get MCLK (and RPi I2S does not provide MCLK), it needs to use BCLK as MCLK, and BCLK has to be at least 2.8 Mhz.
+# when playing 44.1 Khz audio, we can get BCLK to 2.8Mhz if we use 64 x fs bit clock, and rpi-dac driver does just that (hifiberry driver uses 32 x fs which is too slow).
+#
+
 sudo modprobe i2c-dev
 
 echo "* assign GPIO's..."
-sudo gpio mode 25 out # faulty MUTE (1 = MUTE)
+sudo gpio mode 25 out # headphones / line driver enable - this line has to be pulled low !
 sudo gpio mode 26 out # fault/I2C addr  (pin 32)
 sudo gpio mode 27 out # reset           (pin 36)
 sudo gpio mode 28 out # power down      (pin 38)
 
 echo "* try resetting the TAS..."
-sudo gpio write 25 1 # set mute to off
+sudo gpio write 25 0 # _never_ drive this pin high when talkng to "WM Project AMP 0.1 v3 2.1" board
 sleep 0.01
 sudo gpio write 26 1  # set I2C addr to 0x36
 sleep 0.01
@@ -47,7 +56,7 @@ i2cset -y 1 0x1b 0x21 0x00 0x00 0x42 0x03 i
 
 echo "* exiting shutdown mode..."
 
-i2cset -y 1 0x1b 0x05 0x04 # a nie 0x84  ?
+i2cset -y 1 0x1b 0x05 0x84
 
 echo "* setting gain to 0 db..."
 
