@@ -1,0 +1,37 @@
+AttrIb3=value5
+ATTRIB3=val698
+
+rss=Reuters Art&Culture,http://feeds.reuters.com/news/artsculture?format=xml
+rss=Reuters World,http://feeds.reuters.com/Reuters/worldNews?format=xml
+rss=Reuters Technology,http://feeds.reuters.com/reuters/technologyNews?format=xml
+rss=The Register,http://www.theregister.co.uk/headlines.rss
+
+stream=http://xstream1.somafm.com:8040
+stream=http://uwstream3.somafm.com:6200
+stream=http://uwstream3.somafm.com:2020
+stream=http://xstream1.somafm.com:2504
+stream=http://uwstream1.somafm.com:80
+stream=http://uwstream2.somafm.com:8800
+stream=http://xstream1.somafm.com:8388
+stream=http://poznan6.radio.pionier.net.pl:8000/tuba10-1.mp3
+
+alarm=23:59,127,0
+alarm=23:57,127,0  # hour, day bitmap: Unused,Su,Mo,Tu,We,Th,Fr,Sa , activity flag
+
+sleep_timer=40
+fader=2
+volume=10
+wifi_ssid=
+wifi_pass=
+dhcp=
+ip=
+ATTRIb1=val345
+
+ertert 
+ ert ertert 
+et
+ -e ret
+
+
+
+

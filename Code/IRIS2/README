@@ -1,0 +1,36 @@
+packages needed on raspbian:
+
+sudo apt-get install libxml2
+sudo apt-get install libxml2-dev
+sudo apt-get install libcurl3
+sudo apt-get install libcurl4-openssl-dev
+
+libbass-hardfp ARM
+
+picotts:
+
+sudo apt-get install libpopt-dev
+sudo apt-get install libexpat1-dev
+
+Hardware:
+
+Raspberry Pi A+
+
+speaker - Visaton FRWS 5 R
+
+opamp 
+ - NE5532
+
+PSU board for opamp: 
+ - LM2577 S ADJ
+ - ICL7660
+ - solid state relay (P/N?) 
+
+RTC + NVRAM board
+ - DS1397
+ - Atmel 24C512 DIP8 (64KB)
+
+display:
+ - Winstar WEH001602
+
+

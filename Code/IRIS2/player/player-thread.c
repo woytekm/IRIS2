@@ -1,0 +1,669 @@
+#include "global.h"
+#include "version.h"
+#include "WEH001602-lib.h"
+#include "tts.h"
+
+void PL_set_internal_amp(uint8_t mode)
+ {
+   if(mode==1)
+    {
+     bcm2835_gpio_write(INTERNAL_AMP_CONTROL_PIN, HIGH);    
+     G_internal_amp_active = 1;
+    }
+   else if(mode==0)
+    {
+     bcm2835_gpio_write(INTERNAL_AMP_CONTROL_PIN, LOW);
+     G_internal_amp_active = 0;
+    }
+ }
+
+void PL_disp_channel_VU(uint8_t row, uint8_t left_level, uint8_t right_level)
+ {
+   int8_t i,j=0,chr;
+   char display_string[17];
+
+   display_string[16] = 0x0;
+
+   //display_string[7] = 0xF6;
+   //display_string[8] = 0xF7;
+   
+   display_string[7] = ']';
+   display_string[8] = '[';
+
+   for(i=6; i>=0; i--)
+    {
+     chr = 0x01;
+     j++;
+     if(j>left_level)
+      chr = ' ';
+     display_string[i] = chr;
+    }
+
+   j=0;
+
+   for(i=9; i<=15; i++)
+    {
+     chr = 0x01;
+     j++;
+     if(j>right_level)
+      chr = ' ';
+     display_string[i] = chr;
+    }
+ 
+   pthread_mutex_lock(&G_display_lock);
+   my_spi_WEH001602_out_text_at_col(TOP_ROW, 0, display_string);
+   pthread_mutex_unlock(&G_display_lock);   
+
+ }
+
+
+/* matrix analyser test trigger */
+#define MATRIX_ANALYSER_MODE_MONO_HOLD 1
+#define MATRIX_ANALYSER_MODE_STEREO_HOLD 1
+#define MATRIX_ANALYSER_COLOR_01 1
+#define MATRIX_ANALYSER_ON 1
+#define MATRIX_ANALYSER_OFF 2
+
+uint8_t G_matrix_analyser_mode = MATRIX_ANALYSER_MODE_MONO_HOLD;
+uint8_t G_matrix_analyser_state = MATRIX_ANALYSER_ON;
+uint8_t G_matrix_analyser_color_scheme = MATRIX_ANALYSER_COLOR_01;
+uint8_t FFT_values_64_scaled[64];
+
+
+void PL_avg_FFT_256_to_64_with_32_scale(float *fft_256,uint8_t *fft_64_32)
+ {
+  uint16_t i,j=8;
+  float wrk;
+
+  fft_64_32[0] = (uint8_t)(((fft_256[0]+fft_256[1])/2)*100);
+  fft_64_32[1] = (uint8_t)(((fft_256[2]+fft_256[3])/2)*100);
+  fft_64_32[2] = (uint8_t)(((fft_256[4]+fft_256[5])/2)*100);
+  fft_64_32[3] = (uint8_t)(((fft_256[6]+fft_256[7])/2)*100);
+ 
+  fft_64_32[4] = (uint8_t)(((fft_256[8]+fft_256[9])/2)*250);
+  fft_64_32[5] = (uint8_t)(((fft_256[10]+fft_256[11])/2)*250);
+  fft_64_32[6] = (uint8_t)(((fft_256[12]+fft_256[13])/2)*250);
+  fft_64_32[7] = (uint8_t)(((fft_256[14]+fft_256[15])/2)*250); 
+
+  for(i=16; i<240; i = i+4)
+   {
+    wrk = (fft_256[i]+fft_256[i+1]+fft_256[i+2]+fft_256[i+3])/4;
+    fft_64_32[j] = (uint8_t)(wrk*310);
+    j++;
+   }
+
+  fft_64_32[62] = (uint8_t)(((fft_256[238]+fft_256[239]+fft_256[240]+fft_256[241]+fft_256[242]+fft_256[243]+fft_256[244]+fft_256[245])/8)*310);
+  fft_64_32[63] = (uint8_t)(((fft_256[246]+fft_256[247]+fft_256[248]+fft_256[249]+fft_256[250]+fft_256[251]+fft_256[252]+fft_256[253])/8)*310);
+  fft_64_32[64] = (uint8_t)(fft_256[254]*310);
+
+ }
+
+
+void PL_avg_FFT_256_to_64_with_16_scale(float *fft_256,uint8_t *fft_64_16)
+ {
+  uint16_t i,j=0;
+  float wrk;
+
+  fft_64_16[j++] = (fft_256[0]+fft_256[1])/2;
+  fft_64_16[j++] = (fft_256[2]+fft_256[3])/2;
+  fft_64_16[j++] = (fft_256[4]+fft_256[5])/2;
+  fft_64_16[j++] = (fft_256[6]+fft_256[7])/2;
+
+  for(i=8; i<247; i = i+4)
+   {
+    wrk = (fft_256[i]+fft_256[i+1]+fft_256[i+2]+fft_256[i+3])/4;
+    fft_64_16[j] = (uint8_t)(wrk*160);
+    j++;
+   }
+
+ }
+
+void PL_matrix_analyser_display(float *fft_buffer, uint8_t mode, uint8_t color_scheme)
+ {
+  uint8_t i,val;
+
+  m_clear();
+
+  if(mode == MATRIX_ANALYSER_MODE_MONO_HOLD)
+   {
+    PL_avg_FFT_256_to_64_with_32_scale(fft_buffer,&FFT_values_64_scaled);
+   }
+ 
+  for(i=1; i<65; i++)
+   {
+    if(FFT_values_64_scaled[i] > 30) val=30;
+     else val = FFT_values_64_scaled[i];
+    if(val)
+     {
+      m_putvline(i,(31-val),val+1,24);
+      m_putpixel(i,(31-val),19);
+     }
+   }
+
+  m_display(); 
+   
+ }
+
+
+void PL_matrix_analyser_thread(void)
+ {
+
+  float fft[512];
+  uint8_t cleared = 0;
+
+  m_init();
+  m_set_brightness(5);
+
+  while(1)
+   {
+
+     if((G_player_mode != PLAYER_STREAM) && (!cleared))
+      {
+       m_clear();
+       m_display();
+       cleared = 1;
+      }
+
+     if((G_matrix_analyser_state == MATRIX_ANALYSER_ON) && (G_player_mode == PLAYER_STREAM))
+      {
+
+       if(G_matrix_analyser_mode == MATRIX_ANALYSER_MODE_MONO_HOLD)
+        BASS_ChannelGetData(G_stream_chan, fft, BASS_DATA_FFT512);
+       if(G_matrix_analyser_mode == MATRIX_ANALYSER_MODE_STEREO_HOLD)
+        BASS_ChannelGetData(G_stream_chan, fft, BASS_DATA_FFT512|BASS_DATA_FFT_INDIVIDUAL);
+
+       PL_matrix_analyser_display(fft,G_matrix_analyser_mode,G_matrix_analyser_color_scheme);
+       cleared = 0;
+      }
+
+     //usleep(15000);
+     usleep(20000);
+
+   }
+
+ }
+
+void PL_player_display_thread(void)
+ {
+
+   char *meta_copy;
+   char greeting_str[25];
+   DWORD channel_level;
+   uint16_t left_level;
+   uint16_t right_level;
+
+   PL_debug("PL_player_display_thread: starting");
+
+   sprintf(greeting_str,">> Iris v%d.%d <<",IRIS_VER_MAJOR, IRIS_VER_MINOR);
+   
+
+   while(1)
+    {
+
+      if(G_kill_vu)
+       {
+        pthread_mutex_lock(&G_display_lock);
+        my_spi_WEH001602_out_text_at_col(TOP_ROW, 0, "                \0");
+        pthread_mutex_unlock(&G_display_lock);
+
+        G_kill_vu = 0; // does not do anything - implemented for future use
+        G_vu_active = 0;
+       }
+
+     if((G_display_mode_upper_row ==  DISPLAY_MODE_PLAYER_META) && (G_player_mode == PLAYER_STREAM))
+       {
+        meta_copy = strdup(G_current_stream_META);
+        my_spi_WEH001602_scroll_meta_once(meta_copy, TOP_ROW);
+        free(meta_copy);
+       }
+     else if((G_display_mode_lower_row ==  DISPLAY_MODE_PLAYER_META) && (G_player_mode == PLAYER_STREAM))
+      {
+       meta_copy = strdup(G_current_stream_META);
+       my_spi_WEH001602_scroll_meta_once(G_current_stream_META, BOTTOM_ROW);
+       free(meta_copy);
+      }
+     else if((G_display_mode_upper_row ==  DISPLAY_MODE_PLAYER_VU) && (G_player_mode == PLAYER_STREAM))
+      {
+       G_vu_active = 1;
+
+       if(G_stream_channel_status == BASS_ACTIVE_PLAYING)
+        channel_level = BASS_ChannelGetLevel(G_stream_chan);
+       else
+        channel_level = 0;
+
+       left_level = (LOWORD(channel_level)/4681); // 4681 because we are dividing 32768 (max value per channel) onto 7 display segments
+       right_level = (HIWORD(channel_level)/4681);
+
+       PL_disp_channel_VU(1,left_level,right_level);
+
+       usleep(VU_METER_REFRESH_DELAY);
+      } 
+
+     usleep(10000);
+
+    }
+
+  }
+
+
+unsigned char *PL_BASS_get_icy_name(unsigned char *tag_stream)
+ {
+  uint8_t double_null, end = 0, found;
+  uint16_t pos = 0;
+
+  while(!end)
+   {
+    if((tag_stream[pos] == 0x0) && (tag_stream[pos+1] == 0x0))
+     break;
+    if(strstr(&tag_stream[pos],"icy-name:"))
+     return &tag_stream[pos+9];
+    pos++;
+   }
+
+  return NULL;
+ }
+
+void PL_BASS_print_http_header(unsigned char *http_tags)
+ {
+  uint8_t double_null, end = 0, found;
+  uint16_t pos = 0;
+
+  while(!end)
+   {
+    if((http_tags[pos] == 0x0) && (http_tags[pos+1] == 0x0))
+     break;
+    if(http_tags[pos] == '\0')
+     printf(",");
+    else
+     printf("%c",http_tags[pos]);
+    pos++;
+   }
+
+ }
+ 
+void PL_BASS_parse_meta(HSYNC handle, DWORD G_stream_channel, DWORD data, void *user)
+ {
+  const char *meta_string, *p, *p1;
+  meta_string = BASS_ChannelGetTags(G_stream_channel,BASS_TAG_META);
+  p=strstr(meta_string,"StreamTitle='");
+  if (p) 
+   {
+     p=strdup(p+13);
+     strchr(p,';')[-1]=0;
+     p1 = malloc(strlen(p) + strlen(G_streams[G_stream_index]->url) + 10);
+     sprintf(p1,"%s [%s] ",p, G_streams[G_stream_index]->url);
+     strcpy(G_current_stream_META,p1);
+     free(p);
+     free(p1);
+   }
+  else 
+   strcpy(G_current_stream_META,'\0');
+ } 
+ 
+void PL_player_thread(void)
+ {
+  DWORD act,time,level,buffer_fill,buffer_fill_prev,buffering_timer;
+  BOOL ismod;
+  QWORD pos;
+  uint8_t playing, current_stream_index, failure_count = 0, cant_init = 0;
+  int BASS_err = 0;
+  uint16_t tag_check_interval = 0, additional_init_delay = 0;
+  const char *http_tags, *stream_tags, *other_tags, *p, *p1, *icy_name;
+  uint8_t used_internal_spk = 0;
+  int8_t output;
+ 
+  PL_debug("PL_player_thread: starting");
+ 
+  // check the correct BASS was loaded
+  if (HIWORD(BASS_GetVersion())!=BASSVERSION) {
+    PL_debug("PL_player_thread: an incorrect version of BASS was loaded.");
+    return;
+  }
+ 
+  while(1)
+    {       
+
+      playing = 0;
+ 
+      G_prev_volume_level = G_config.volume_level;
+
+      while(G_player_mode!=PLAYER_STREAM)
+       usleep(60*1000); 
+    
+      pthread_mutex_lock(&G_display_lock);
+      my_spi_WEH001602_out_text_at_col(BOTTOM_ROW, 15, "\xf6\0"); // arrow indicating that stream start command was received
+      pthread_mutex_unlock(&G_display_lock); 
+  
+      // setup output device
+
+       if((!G_internal_amp_active)&&(!G_bt_connected))
+        {
+         PL_debug("PL_player_thread: turning on internal speaker amp");
+         PL_set_internal_amp(1);
+         used_internal_spk = 1;
+         output = AUDIO_OUT_INTERNAL;
+        }
+       else
+        output = AUDIO_OUT_DEFAULT; // this should be BT speaker
+
+      if((G_prev_output_device == AUDIO_OUT_INTERNAL) && (output == AUDIO_OUT_DEFAULT) && (G_config.volume_level > 0.80)) // automatically lower volume when going from internal speaker to bt speaker
+       {
+        PL_debug("PL_player_thread: detected switch from internal speaker to BT speaker - auto reducing volume to 0.76");
+        G_config.volume_level = 0.76;
+       }
+      else if((G_prev_output_device == AUDIO_OUT_DEFAULT) && (output == AUDIO_OUT_INTERNAL) && (G_config.volume_level < 0.85)) // automatically increase volume when going from bt to internal speaker
+       {
+        PL_debug("PL_player_thread: detected switch from BT speaker to internal - auto increasing volume to 0.86");
+        G_config.volume_level = 0.86;
+       }
+
+      if(!G_BASS_in_use)
+       if(!BASS_Init(output,44100,0,0,NULL))
+        {
+         PL_debug("PL_player_thread: BASS error: can't initialize playback device.");
+         cant_init++;
+         
+         additional_init_delay = cant_init * 40000;
+ 
+         usleep(10*1000 + additional_init_delay);
+         if(cant_init == 3)
+          {
+           G_player_mode = PLAYER_STOP;
+           PL_debug("PL_player_thread: couldn't initialize playback device - stop.");
+           pthread_mutex_lock(&G_display_lock);
+           my_spi_WEH001602_out_text_at_col(BOTTOM_ROW, 14, " \0");
+           my_spi_WEH001602_out_text_at_col(BOTTOM_ROW, 15, " \0");
+           my_spi_WEH001602_out_text_at_col(TOP_ROW, 0, "  [device error]  ");
+           sleep(1);
+           my_spi_WEH001602_out_text_at_col(TOP_ROW, 0, "                ");
+           pthread_mutex_unlock(&G_display_lock);
+          }
+         continue;
+        }
+       
+      cant_init = 0;
+
+      G_BASS_in_use |= BASS_IN_USE_BY_STREAM;
+     
+      BASS_SetConfig(BASS_CONFIG_NET_BUFFER, 6500); 
+      BASS_SetConfig(BASS_CONFIG_NET_READTIMEOUT, 10000);
+      BASS_SetConfig(BASS_CONFIG_NET_PLAYLIST,2); // parse stream URL's in *.pls and *.m3u  urls
+      BASS_SetConfig(BASS_CONFIG_CURVE_VOL,TRUE); // logarythmic volume scale 
+
+      current_stream_index = G_stream_index;
+
+      // try streaming the file/url
+
+      PL_debug("PL_player_thread: trying to stream: %s (stream type: %d)",G_streams[G_stream_index]->url, G_streams[G_stream_index]->type);
+
+      switch(G_streams[G_stream_index]->type)
+       {
+
+        case STREAM_TYPE_MP3: // this is also for OGG streams
+          G_stream_chan=BASS_StreamCreateURL(G_streams[G_stream_index]->url,0,BASS_SAMPLE_LOOP|BASS_SAMPLE_FLOAT,0,0);
+          break;
+
+        case STREAM_TYPE_AAC:
+          G_stream_chan=BASS_AAC_StreamCreateURL(G_streams[G_stream_index]->url,0,BASS_SAMPLE_LOOP|BASS_SAMPLE_FLOAT,0,0);
+          break;
+
+        case STREAM_TYPE_FLAC:
+          G_stream_chan=BASS_FLAC_StreamCreateURL(G_streams[G_stream_index]->url,0,BASS_SAMPLE_LOOP|BASS_SAMPLE_FLOAT,0,0);
+          break;
+  
+        default:
+         PL_debug("PL_player_thread: unknown stream type specified (%d) - stop.",G_streams[G_stream_index]->type);
+         G_player_mode = PLAYER_STOP;
+         continue;
+
+       }
+
+      if (G_stream_chan)
+        pos=BASS_ChannelGetLength(G_stream_chan,BASS_POS_BYTE);
+      else
+       {
+
+          // Ok, we have failed to create the stream. It's no big deal if player was started by the user. It's a different thing 
+          // if player start was triggered by the clock thread (this is an alarm). If we fail to start stream - owner of the device will not be able wake up, 
+          // so now we have to fall back to triggering local alarm sound instead of radio stream - do this if G_wakeup equals 1.
+
+          BASS_err = BASS_ErrorGetCode();
+          usleep(1000);
+          pthread_mutex_lock(&G_display_lock);
+          my_spi_WEH001602_out_text_at_col(BOTTOM_ROW, 15, " \0"); // clear arrow 
+          my_spi_WEH001602_out_text_at_col(TOP_ROW, 0, " [stream error] "); 
+          sleep(1);
+          my_spi_WEH001602_out_text_at_col(TOP_ROW, 0, "                ");
+          pthread_mutex_unlock(&G_display_lock);
+          G_player_mode = PLAYER_STOP;
+          PL_debug("PL_player_thread: couldn't create stream %s (BASS error %d). player stop.",G_streams[G_stream_index]->url, BASS_err);
+
+          if(G_wakeup)
+           {
+            G_player_mode = PLAYER_STOP;
+            usleep(1000);
+            G_player_mode = ALARM_ACTIVE;  // Wake up alarm thread. It will clear G_wakeup flag by itself.
+           }  
+
+          continue;
+       }
+
+       PL_debug("PL_player_thread: stream %s created successfully",G_streams[G_stream_index]->url);
+       PL_debug("PL_player_thread: setting stream parameters");
+       BASS_ChannelSetSync(G_stream_chan,BASS_SYNC_META,0,&PL_BASS_parse_meta,0);
+    
+       if(G_TTS_state == TTS_PLAYING)
+         BASS_ChannelSetAttribute(G_stream_chan,BASS_ATTRIB_VOL,0.35);
+       else
+         BASS_ChannelSetAttribute(G_stream_chan,BASS_ATTRIB_VOL,G_config.volume_level);
+
+       PL_debug("PL_player_thread: playing stream");
+       BASS_ChannelPlay(G_stream_chan,FALSE);
+       
+       p1 = malloc(strlen(G_streams[G_stream_index]->url) + 10);
+       sprintf(p1,"[%s] ",G_streams[G_stream_index]->url);
+       strcpy(G_current_stream_META,p1);
+       free(p1);
+
+       playing = 1;
+       
+       sleep(1);
+  
+       BASS_SetConfig(BASS_CONFIG_NET_READTIMEOUT, 40000); // 40 sec. buffering timeout
+
+       if(G_wakeup)
+        G_wakeup = 1;
+ 
+       while ((G_player_mode!=PLAYER_STOP) && (G_stream_index == current_stream_index))
+         {
+
+          G_stream_channel_status = BASS_ChannelIsActive(G_stream_chan);
+
+          if( (G_stream_channel_status != BASS_ACTIVE_PLAYING) && (G_stream_channel_status != BASS_ACTIVE_STALLED) )  // stream is not playing - restart
+           {
+            sleep(1);  // throttle this a bit just in case
+            PL_debug("PL_player_thread: stream stopped by itself... trying to restart");
+            failure_count++;
+
+            if(failure_count > 3) // stop player after 3 consecutive BASS failures
+             {
+              PL_debug("PL_player_thread: 3 consecutive BASS failures - giving up - stopping stream.");
+              G_player_mode = PLAYER_STOP;
+              failure_count = 0;
+
+              usleep(1000);
+
+              if(G_wakeup)
+               G_player_mode = ALARM_ACTIVE;
+             }
+    
+            break;
+           }
+
+          failure_count = 0;
+
+          level=BASS_ChannelGetLevel(G_stream_chan);
+          pos=BASS_ChannelGetPosition(G_stream_chan,BASS_POS_BYTE);
+          time=BASS_ChannelBytes2Seconds(G_stream_chan,pos);
+          buffer_fill=BASS_StreamGetFilePosition(G_stream_chan,BASS_FILEPOS_BUFFER)*100/BASS_StreamGetFilePosition(G_stream_chan,BASS_FILEPOS_END); 
+
+          if(G_TTS_state != TTS_PLAYING)
+           if(G_config.volume_level != G_prev_volume_level)
+            {
+             char debug_str[255];
+             sprintf(debug_str,"PL_player_thread: changing volume to: %1.2f",G_config.volume_level);
+             PL_debug(debug_str);
+
+             BASS_ChannelSetAttribute(G_stream_chan,BASS_ATTRIB_VOL,G_config.volume_level);
+             G_prev_volume_level = G_config.volume_level;
+            }
+ 
+          if(tag_check_interval == 30)
+           {
+             //printf("player-thread: buffer fill %d%\n",buffer_fill);
+             stream_tags = BASS_ChannelGetTags(G_stream_chan,BASS_TAG_META);
+             other_tags = BASS_ChannelGetTags(G_stream_chan,BASS_TAG_ICY);
+
+             http_tags = BASS_ChannelGetTags(G_stream_chan, BASS_TAG_HTTP);
+
+             if(http_tags != NULL) { icy_name = PL_BASS_get_icy_name(http_tags); }
+             if(other_tags != NULL) { icy_name = PL_BASS_get_icy_name(other_tags); }
+
+             tag_check_interval = 0;
+             if(stream_tags != NULL)
+              {
+               p=strstr(stream_tags,"StreamTitle='");
+               if (p) {
+                p=strdup(p+13);
+                strchr(p,';')[-1]=0;
+
+                if(icy_name == NULL)
+                 {
+                  p1 = malloc(strlen(p) + strlen(G_streams[G_stream_index]->url) + 10);
+                  sprintf(p1,"%s [%s] ",p, G_streams[G_stream_index]->url);
+                 }
+                else
+                 {
+                  p1 = malloc(strlen(p) + strlen(icy_name) + 10);
+                  sprintf(p1,"%s [%s] ",p, icy_name);
+                 }
+
+                strcpy(G_current_stream_META,p1);
+                free(p);
+                free(p1);
+             }
+             //free(stream_tags);
+            }
+           }
+ 
+     if(buffer_fill < 30)  
+       {
+         buffering_timer++;
+         if(G_global_mode == GLOBAL_MODE_NORMAL)
+          {
+           pthread_mutex_lock(&G_display_lock);
+           my_spi_WEH001602_def_char(2,0x001F13151315131F);
+           my_spi_WEH001602_out_text_at_col(BOTTOM_ROW, 14, "\x2\0");  // print "buffering" indicator
+           pthread_mutex_unlock(&G_display_lock);
+          }
+       }
+
+     if((buffer_fill < 50) && (buffer_fill == buffer_fill_prev)) // stalled?
+      buffering_timer++;
+
+     if((buffer_fill > 40) && (buffer_fill < 70))
+       {
+        buffering_timer = 0; // reset buffering timer
+        if(G_global_mode == GLOBAL_MODE_NORMAL)
+         {
+          pthread_mutex_lock(&G_display_lock);
+          my_spi_WEH001602_out_text_at_col(BOTTOM_ROW, 14, " \0");
+          pthread_mutex_unlock(&G_display_lock);
+         }
+       }
+
+     if(buffer_fill > 70)
+       {
+        buffering_timer = 0; // reset buffering timer
+        if(G_global_mode == GLOBAL_MODE_NORMAL)
+         {
+          pthread_mutex_lock(&G_display_lock);
+          my_spi_WEH001602_def_char(2,0x001F181515151B1F);
+          my_spi_WEH001602_out_text_at_col(BOTTOM_ROW, 14, "\x2\0"); // print "quality stream" indicator (buffer filled more than 70%)
+          pthread_mutex_unlock(&G_display_lock);
+         }
+       }
+
+     if(buffering_timer > ENOUGH_BUFFERING)
+       {
+        PL_debug("PL_player_thread: bufering takes too long - restarting stream");
+        break;
+       }
+
+     buffer_fill_prev = buffer_fill;
+
+
+     // if we are started by alarm - check if we are actually playing something (check if play loop goes on)
+     // if play loop goes on through 50 iterations (stream seems stable) - clear alarm flag 
+     // this will prevent starting alarm sound on stream failure.
+
+     if(G_wakeup)
+      G_wakeup++;
+
+     if(G_wakeup > 50)
+      G_wakeup = 0;
+
+     tag_check_interval++;
+
+     usleep(90*1000);
+
+     //PL_debug("PL_player_thread: play loop: (buffer_fill = %d, buffering_timer = %d)",buffer_fill, buffering_timer); 
+
+   } // end of play loop
+ 
+   if(playing) // cleanup and go to the next stream, or wait for play command
+    {
+      PL_debug("PL_player_thread: stopping stream and cleaning up...");
+      // fade-out to avoid a "click"
+      BASS_ChannelSlideAttribute(G_stream_chan,BASS_ATTRIB_VOL,0,300);
+      // wait for slide to finish
+      while (BASS_ChannelIsSliding(G_stream_chan,0)) usleep(1000);
+        BASS_ChannelStop(G_stream_chan);
+      BASS_StreamFree(G_stream_chan);
+      strcpy(G_current_stream_META," ");
+      if(G_global_mode == GLOBAL_MODE_NORMAL)
+       {
+        pthread_mutex_lock(&G_display_lock);
+        my_spi_WEH001602_out_text_at_col(BOTTOM_ROW, 14, " \0");
+        my_spi_WEH001602_out_text_at_col(BOTTOM_ROW, 15, " \0");
+        my_spi_WEH001602_out_text_at_col(TOP_ROW, 0, "                \0");
+        pthread_mutex_unlock(&G_display_lock);
+       }
+
+      G_BASS_in_use ^= BASS_IN_USE_BY_STREAM; // clear channel usage flag
+    
+      if(!G_BASS_in_use)
+       {
+        PL_debug("PL_player_thread: stopping BASS");
+        BASS_Free();
+        if(used_internal_spk)
+         {
+          PL_debug("PL_player_thread: turning off internal speaker");
+          PL_set_internal_amp(0);
+          used_internal_spk = 0;
+         }
+       }
+      
+      G_prev_output_device = output;
+      G_stream_channel_status = BASS_ACTIVE_STOPPED;
+      buffering_timer = 0;
+
+      usleep(50000);  
+
+    }
+ 
+   }
+ 
+ }
+
+

@@ -1,0 +1,29 @@
+
+Fri Feb 10 22:12:47 PST 2006
+Discovered that although the SunOS/slash-proc version allows us to specify a
+list of system calls we're interested in, when the ioctl returns, it -doesn't-
+always return with one of our selected system calls.  So today I added a switch
+on the syscalls we're interested, to ignore the one's we don't care about - IE,
+to not pause on uninteresting syscalls.
+
+Sat Apr  9 19:09:19 PDT 2005
+monitor function now takes another argument, which distinguishes between
+a process we're attaching to, and a process we're forking ourselves.
+The variable is unneeded in the Solaris /proc version, but the Linux
+ptrace() version requires it.
+
+Thu Mar 31 06:50:15 PST 2005
+Modified code to have one "common.c", and then one OS-specific .c for
+each of SunOS and Linux.  The SunOS code uses /proc, and the linux code
+uses ptrace().
+
+Wed Mar 30 09:22:49 PST 2005
+slowdown.c appears to work on Fedora Core 3, and uses ptrace().  FC3
+doesn't appear to have a praddset function, among other missing items
+for a /proc implementation.
+
+slowdown2.c appears to work on Solaris 8, and uses /proc.
+the ptrace version doesn't work on Solaris 8...
+
+I hope to merge these into a single program at some point in the future.
+
