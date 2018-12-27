@@ -15,14 +15,12 @@ uint8_t PL_keyboard_init(void)
    if (!bcm2835_init())
      return 0;
 
-   bcm2835_gpio_fsel(KEY1, BCM2835_GPIO_FSEL_INPT);
-   bcm2835_gpio_fsel(KEY2, BCM2835_GPIO_FSEL_INPT);
-   bcm2835_gpio_fsel(KEY3, BCM2835_GPIO_FSEL_INPT);
-   bcm2835_gpio_fsel(KEY4, BCM2835_GPIO_FSEL_INPT);
-   bcm2835_gpio_fsel(KEY5, BCM2835_GPIO_FSEL_INPT);
-   bcm2835_gpio_fsel(KEY6, BCM2835_GPIO_FSEL_INPT);
-   bcm2835_gpio_fsel(KEY7, BCM2835_GPIO_FSEL_INPT);
-   bcm2835_gpio_fsel(KEY8, BCM2835_GPIO_FSEL_INPT);
+   bcm2835_gpio_fsel(KEYPAD_DATA, BCM2835_GPIO_FSEL_INPT);
+   bcm2835_gpio_fsel(KEYPAD_LATCH, BCM2835_GPIO_FSEL_OUTP);
+   bcm2835_gpio_fsel(KEYPAD_CLK, BCM2835_GPIO_FSEL_OUTP);
+
+   bcm2835_gpio_write(KEYPAD_CLK, LOW);
+   bcm2835_gpio_write(KEYPAD_LATCH, HIGH);
 
    usleep(1000);
 
@@ -30,15 +28,43 @@ uint8_t PL_keyboard_init(void)
 
  }
 
+void PL_keypad_shift_in(void)
+ {
+
+  uint8_t keypad_bitmap = 0, keypad_input, keypad_save = 0, i;
+  
+  bcm2835_gpio_write(KEYPAD_LATCH, LOW);
+  usleep(1000);
+  bcm2835_gpio_write(KEYPAD_LATCH, HIGH);
+  usleep(1000);
+
+  i = 0;
+  keypad_input = bcm2835_gpio_lev(KEYPAD_DATA);
+  G_keys[i] = keypad_input;
+
+  usleep(1000);
+
+  for(i=1;i<8;i++)
+   {
+     bcm2835_gpio_write(KEYPAD_CLK, HIGH);
+     usleep(1000);
+     keypad_input = bcm2835_gpio_lev(KEYPAD_DATA);
+     bcm2835_gpio_write(KEYPAD_CLK, LOW);
+     G_keys[i] = keypad_input;
+     usleep(1000);
+   }
+ }
 
 uint8_t PL_keyboard_scan(unsigned char *message, uint8_t row, uint16_t times)
  {
 
    uint8_t i, keymap = 0;
 
+   PL_keypad_shift_in();  // G_keys is filled in with states of keys on the keypad
+
    for(i=0; i<=KEYS_NO; i++)
     {
-    if(!bcm2835_gpio_lev(G_keys[i]))
+    if(!G_keys[i])
      {
       G_key_interval_ctr[i]++;
       if(G_key_interval_ctr[i] == THRESHOLD1)

@@ -10,7 +10,7 @@ LIBS = -lplclock -lWEH001602 -lbcm2835
 all: libconfig.a
 
 
-libconfig.a:
+libconfig.a: config.c persistence-thread.c
 	$(CC) config.c -g -c $(INCLUDES)
 	$(CC) persistence-thread.c -g -c $(INCLUDES)
 	$(AR) rcs libconfig.a config.o persistence-thread.o

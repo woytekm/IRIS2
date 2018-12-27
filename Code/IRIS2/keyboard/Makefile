@@ -2,7 +2,9 @@ include ../Makefile.inc
 
 INCLUDES = $(TOPINCLUDES) -I ../include -I ../display -I ../tts 
 
-all:
+all: libkeyboard.a 
+
+libkeyboard.a: keyboard-scan.c keyboard-thread.c
 	$(CC) keyboard-scan.c -c $(INCLUDES)
 	$(CC) -c keyboard-thread.c -c $(INCLUDES)
 	$(AR) rcs libkeyboard.a keyboard-scan.o keyboard-thread.o

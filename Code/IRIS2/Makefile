@@ -6,20 +6,18 @@ INCLUDES = -I wifi -I alarm -I config -I system -I player -I include -I clock -I
 MAIN_EXE = Iris
 MAIN_EXE_STATIC = Iris-static
 PLLIBS = libplclock.a libWEH001602.a librss-reader.a libplayer.a libkeyboard.a libconfig.a libsetup.a librss-tts.a libsystem.a libalarm.a libwifi.a libmatrix.a
-DIRS = clock display player config rss keyboard setup tts matrix wifi alarm system
+DIRS = clock display player config rss keyboard setup tts matrix wifi alarm system IRIS2
 
 
-all:	$(PLLIBS) $(MAIN_EXE)
+all: $(PLLIBS) $(MAIN_EXE)
 
-all_static:	$(PLLIBS) $(MAIN_EXE_STATIC)
+all_static: $(PLLIBS) $(MAIN_EXE_STATIC)
 
-$(MAIN_EXE):
-	$(CC) -c main.c $(INCLUDES)
-	$(CC) -o $(MAIN_EXE) main.o $(LIBS) $(LIBSEARCH)
+$(MAIN_EXE): $(PLLIBS)
+	cd IRIS2; $(MAKE) $(MAIN_EXE) 
 
-$(MAIN_EXE_STATIC):
-	$(CC) -c main.c $(INCLUDES)
-	$(CC) -static -o $(MAIN_EXE) main.o $(LIBS) $(LIBSEARCH)
+$(MAIN_EXE_STATIC): $(PLLIBS)
+	cd IRIS2; $(MAKE) $(MAIN_EXE_STATIC)
 
 libmatrix.a:
 	cd matrix; $(MAKE)
@@ -57,8 +55,8 @@ libalarm.a:
 libwifi.a:
 	cd wifi; $(MAKE)
 
-install:
-	mv $(MAIN_EXE) /usr/local/bin
+install: $(MAIN_EXE)
+	mv IRIS2/$(MAIN_EXE) /usr/local/bin
 
 clean:
 	rm -f *.o *.a core $(MAIN_EXE)

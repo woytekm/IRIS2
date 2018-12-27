@@ -2,7 +2,9 @@ include ../Makefile.inc
 
 INCLUDES = $(TOPINCLUDES) -I ../include
 
-all:
+all: libWEH001602.a
+
+libWEH001602.a: WEH001602-lib.c
 	$(CC) WEH001602-lib.c -c $(INCLUDES)
 	$(AR) rcs libWEH001602.a WEH001602-lib.o
 

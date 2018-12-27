@@ -4,7 +4,9 @@ INCLUDES= $(TOPINCLUDES) -I ../include  -I ../display -I ../tts
 
 LIBSEARCH= -L . 
 
-all:
+all: libsystem.a
+
+libsystem.a: system.c indicators.c commands.c websrv.c REST.c webadmin.c
 	$(CC) system.c -g -c $(INCLUDES)
 	$(CC) indicators.c -g -c $(INCLUDES)
 	$(CC) commands.c -g -c $(INCLUDES)

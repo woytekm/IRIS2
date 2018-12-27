@@ -1,0 +1,128 @@
+#!/bin/ash
+
+#----------------------------------------------------
+
+MYPROD=`cat /etc/product`
+MYPROD_BINARY=/usr/bin/Iris
+
+LD_LIBRARY_PATH=/usr/local/lib
+
+# Setup environment
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+export LANG=C
+export LC_ALL=C
+
+dmesg -n 3
+
+#-----------------------------------------------------
+
+echo "Starting product ($MYPROD)..."
+
+echo "Starting hwclock..."
+echo ds1307 0x68 > /sys/class/i2c-adapter/i2c-1/new_device
+
+if [ -f /tmp/firstboot ]
+ then
+  #initialize RTC
+  hwclock -w --rtc /dev/rtc0
+ fi
+
+echo "Trying to sync system clock to hwclock..."
+IS_HWCLOCK_SANE=`hwclock -r --rtc /dev/rtc0 | awk '{print $5;}'`
+
+if [ "$IS_HWCLOCK_SANE" -ge 2015 ]
+ then
+  echo "hwclock seems sane - using it..."
+  hwclock -s --rtc /dev/rtc0
+ else
+  echo "hwclock is unusable - staying in 70's..."
+ fi
+
+echo "Setting timezone from nvram..."
+
+TIME_Z=`nvram get timezone`
+
+if [ "$TIME_Z" = "" ]
+ then
+  TIME_Z=UTC
+ fi
+
+ZONEINFO_PATH=`find /usr/share/zoneinfo -name $TIME_Z`
+
+if [ "$ZONEINFO_PATH" = "" ]
+ then
+  #give up
+  echo "Unknown timezone set in nvram - using defaults" 
+ else
+  rm /etc/localtime
+  ln -s $ZONEINFO_PATH /etc/localtime
+ fi
+
+if [ ! -f /etc/iris_websrv_cert.pem ]  # no web server certficate - generate one
+ then
+
+  if [ ! -f /etc/iris_websrv_key.pem ]
+   then
+     certtool --generate-privkey --outfile /etc/iris_websrv_key.pem
+   fi
+
+  certtool --generate-self-signed --template /etc/iris.cert.template  --load-privkey /etc/iris_websrv_key.pem --outfile /etc/iris_websrv_cert.pem
+
+ fi
+
+echo "Generating wireless network config from nvram..."
+
+WIFI_TYPE=`nvram get wifi_type`
+WIFI_SSID=`nvram get wifi_ssid`
+WIFI_PSK=`nvram get wifi_password`
+
+WLAN_DRIVER=`nvram get wifi_driver`
+
+if [ "$WLAN_DRIVER" != "" ]
+ then
+  /sbin/modprobe $WLAN_DRIVER
+ fi
+
+/usr/sbin/generate_wpasupconf.sh $WIFI_TYPE $WIFI_SSID $WIFI_PSK > /etc/wpa_supplicant.conf
+
+USE_BLUETOOTH=`nvram get use_bt`
+
+if [ "$USE_BLUETOOTH" = "1" ]
+ then
+
+  /usr/local/bin/dbus-daemon --system
+  /usr/local/sbin/bluetoothd
+
+  SPEAKER_ADDR=`/usr/sbin/nvram get bt_speaker`
+
+  if [ "$SPEAKER_ADDR" != "" ]
+   then
+     /usr/sbin/iris-generate-a2dp-cfg.sh $SPEAKER_ADDR  > /usr/local/share/alsa/alsa.conf.d/bluetooth.conf
+   fi
+
+ fi
+
+echo "Starting product ($MYPROD) binary..."
+
+if [ -x $MYPROD_BINARY ]
+ then
+  PROD_DEBUG=`nvram get debug`
+  if [ "$PROD_DEBUG" = "1" ]
+   then
+    $MYPROD_BINARY -d &
+   else
+    $MYPROD_BINARY &
+   fi
+ fi
+
+echo "$MYPROD started."
+
+if [ "$USE_BLUETOOTH" = "1" ]
+ then
+   echo "Connecting BT speaker..."
+   /usr/sbin/iris-connect-bt-speaker.sh
+ fi
+
+echo "rc.$MYPROD executed" > /tmp/rc.$MYPROD.trace
+
+# script end

@@ -8,7 +8,7 @@ LIBSEARCH= -L . -L ../clock -L ../display
 all: libsetup.a
 
 
-libsetup.a:
+libsetup.a: setup.c
 	$(CC) setup.c -g -c $(INCLUDES)
 	$(AR) rcs libsetup.a setup.o
 

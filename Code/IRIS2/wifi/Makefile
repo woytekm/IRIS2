@@ -4,7 +4,9 @@ INCLUDES= $(TOPINCLUDES) -I../display -I ../include -I ../rss
 
 LIBSEARCH= -L . -L ../display
 
-all:
+all: libwifi.a
+
+libwifi.a: wifi_signal.c
 	$(CC) wifi_signal.c -g -c $(INCLUDES)
 	$(AR) rcs libwifi.a wifi_signal.o
 

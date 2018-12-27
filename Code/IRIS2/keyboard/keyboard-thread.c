@@ -12,6 +12,8 @@ void PL_dispatch_keyboard_event(uint8_t keyboard_state)
 
   uint8_t TTS_thread_msg[2]; // two bytes: 1 = operation type, 2 = stream index
 
+  PL_debug("PL_dispatch_keyboard_event: keymap: %d",keyboard_state);
+
   if(keyboard_state == KEY_SETUP)
    {
     
@@ -386,9 +388,13 @@ void PL_keyboard_thread(void)
    {
 
      keyboard_state = PL_keyboard_scan();
+
+     //if(keyboard_state)
+     // PL_debug("PL_keyboard_thread: keyboard_state > 0 : %d", keyboard_state);
+
      if(keyboard_state != prev_keyboard_state)
       {
-
+       PL_debug("PL_keyboard_thread: new keyboard state: %d", keyboard_state);
        if(G_global_mode == GLOBAL_MODE_SETUP)
         {
          write(setup_input_pipe,&keyboard_state,1); // if we are in setup mode - pass keystroke to setup thread

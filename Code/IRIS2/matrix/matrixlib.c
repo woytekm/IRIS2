@@ -36,7 +36,8 @@
 
 void m_clear()
  {
-  bzero(mi_matrix_edit_buffer,MATRIXBUFLEN);
+  bzero(&mi_matrix_edit_buffer,MATRIXBUFLEN);
+  bzero(&mi_matrix_commit_buffer,MATRIXBUFLEN);
  }
 
 void m_init(void)

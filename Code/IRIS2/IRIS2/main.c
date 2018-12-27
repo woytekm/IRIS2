@@ -51,7 +51,7 @@ main(int argc, char **argv)
   G_iris_tasks[TASK_SNOOZE] = PL_start_task(TASK_SNOOZE, PL_snooze_timer_thread, NULL, SCHED_RR, 70);
   G_iris_tasks[TASK_RSS] = PL_start_task(TASK_RSS, PL_rss_reader_thread, NULL, SCHED_RR, 85);
   G_iris_tasks[TASK_PLAYER] = PL_start_task(TASK_PLAYER, PL_player_thread, NULL, SCHED_RR, 86);
-  /* G_iris_tasks[TASK_KEYBOARD] = PL_start_task(TASK_KEYBOARD, PL_keyboard_thread, NULL, SCHED_RR, 87); */
+  G_iris_tasks[TASK_KEYBOARD] = PL_start_task(TASK_KEYBOARD, PL_keyboard_thread, NULL, SCHED_RR, 87); 
   G_iris_tasks[TASK_PLAYER_DISPLAY] = PL_start_task(TASK_PLAYER_DISPLAY, PL_player_display_thread, NULL, SCHED_RR, 95);
   G_iris_tasks[TASK_SETUP] = PL_start_task(TASK_SETUP, PL_setup_thread, NULL, SCHED_RR, 80);
   G_iris_tasks[TASK_TTS_INDICATOR] = PL_start_task(TASK_TTS_INDICATOR, PL_TTS_indicator_thread, NULL, SCHED_RR, 54);

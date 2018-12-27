@@ -149,6 +149,7 @@ void PL_matrix_analyser_thread(void)
  {
 
   float fft[512];
+  uint16_t i;
   uint8_t cleared = 0;
 
   m_init();
@@ -161,6 +162,8 @@ void PL_matrix_analyser_thread(void)
       {
        m_clear();
        m_display();
+       for(i=0; i > 512; i++)
+         fft[i] = 0;
        cleared = 1;
       }
 

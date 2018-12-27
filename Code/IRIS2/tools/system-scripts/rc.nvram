@@ -1,0 +1,158 @@
+#!/bin/ash
+#
+# nard NVRAM init script
+#
+
+#
+# nvram structure
+# 0KB  - 8KB  - nvram variables in "attribute=value\n" format
+# 8KB  - 16KB - gzipped rc script which if found - will be extracted, copied to /etc and executed during boot as product script
+# 16KB - 24KB - tar.gzipped /etc/settings directory (passwd,hostname,nodeid,network,dropbear_rsa_host_key)
+# 24KB - 25KB - persistence data (stream index, rss index, volume, stream state)
+# 25KB - 32KB - future use...
+#
+
+#-------------------------------------------------
+echo
+echo "Running nvram check/init..."
+
+# Setup environment
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+export LANG=C
+export LC_ALL=C
+
+dmesg -n 3
+
+NVRAM_CACHE=/tmp/nvram.cache
+
+clear_nvram_cache()
+ {
+  cat $NVRAM_CACHE | grep -e \= -e \# > $NVRAM_CACHE.tmp
+  mv $NVRAM_CACHE.tmp $NVRAM_CACHE
+ }
+
+#-------------------------------------------------
+
+MYPROD=`cat /etc/product`
+CHIP_TYPE="24c512"
+
+# fire up eeprom driver. in general - nvram subsystem expects Atmel AT24c128, AT24c256 or AT24c512 chips (currently only 24KB in use)
+
+modprobe at24
+
+if [ ! -f /sys/bus/i2c/devices/i2c-1/1-0050/eeprom ]
+ then
+  echo $CHIP_TYPE 0x50 > /sys/class/i2c-adapter/i2c-1/new_device
+  sleep 1
+ fi
+
+# check if we have nvram chip, if no - revert to fake nvram, if there is no fake nvram file - initialize it
+
+if [ -f /sys/bus/i2c/devices/i2c-1/1-0050/eeprom ]
+ then
+   ln -s /sys/bus/i2c/devices/i2c-1/1-0050/eeprom /dev/nvram
+ else
+   if [ -f /sdcard/$MYPROD/nvram ]
+    then
+     ln -s /sdcard/$MYPROD/nvram /dev/nvram
+   else
+    if [ ! -d "/sdcard/$MYPROD" ]
+     then
+      mkdir /sdcard/$MYPROD
+     fi
+   touch /sdcard/$MYPROD/nvram
+   ln -s /sdcard/$MYPROD/nvram /dev/nvram
+  fi
+ fi
+
+
+#get /etc/settings/ archive from nvram
+dd if=/dev/nvram of=/tmp/settings.tar.gz bs=128 skip=128 count=64 2>/dev/null
+
+#load into nvram:
+#dd of=/dev/nvram if=/tmp/settings.tar.gz bs=128 seek=128 count=64
+#
+#clear from nvram:
+#dd of=/dev/nvram if=/dev/zero bs=128 seek=128 count=64
+
+GZSIG=`hexdump -n2 -x /tmp/settings.tar.gz | awk '{print $2;}'`
+
+if [ "$GZSIG" != "8b1f" ]  # seems that data dumped from /dev/nvram is not a gzip archive
+ then
+  continue
+ else # we have gzipped /etc/settings in nvram - use
+  mv /tmp/settings.tar.gz /etc/
+  cd /etc/
+  tar -zxvf settings.tar.gz
+
+  if [ -f /etc/settings/passwd ]
+   then
+    rm /etc/passwd
+    mv /etc/settings/passwd /etc
+   fi
+
+  if [ -f /etc/settings/dropbear_rsa_host_key ]
+   then
+    rm -f /etc/dropbear/dropbear_rsa_host_key
+    mv /etc/settings/dropbear_rsa_host_key /etc/dropbear
+   fi
+
+  if [ -f /etc/settings/hostname ]
+   then
+    rm -f /etc/hostname
+    mv /etc/settings/hostname /etc/
+   fi
+
+  if [ -f /etc/settings/iris_websrv_key.pem ]
+   then
+    mv /etc/settings/iris_websrv_key.pem /etc/
+   fi
+
+  if [ -f /etc/settings/iris_websrv_cert.pem ]
+   then
+    mv /etc/settings/iris_websrv_cert.pem /etc/
+   fi
+
+ fi
+
+#get rc script from nvram
+dd if=/dev/nvram of=/tmp/rc.$MYPROD.gz bs=128 skip=64 count=64 >/dev/null 2>/dev/null
+
+#load into nvram:
+#dd of=/dev/nvram if=/tmp/rc.$MYPROD.gz bs=128 seek=64 count=64
+#
+#clear from nvram:
+#dd of=/dev/nvram if=/dev/zero bs=128 seek=64 count=64
+
+GZSIG=`hexdump -n2 -x /tmp/rc.$MYPROD.gz | awk '{print $2;}'`
+
+if [ "$GZSIG" != "8b1f" ]  # seems that data dumped from /dev/nvram is not a gzipped rc script - use template script
+ then
+  mv /etc/$MYPROD.rc.template /etc/rc.$MYPROD
+  chmod a+x /etc/rc.$MYPROD
+ else # we have gzipped init script in nvram - use it
+  gzip -d /tmp/rc.$MYPROD.gz
+  mv /tmp/rc.$MYPROD /etc
+  chmod a+x /etc/rc.$MYPROD
+ fi
+
+dd if=/dev/nvram of=$NVRAM_CACHE bs=128 count=64 >/dev/null 2>/dev/null
+
+clear_nvram_cache
+
+NVRAMSIG=`cat $NVRAM_CACHE | head -1 | grep "$MYPROD nvram data" | wc -l`
+
+if [ "$NVRAMSIG" -ne 1 ]  # nvram variable area is uninitialized - initialize it
+ then
+  #init nvram:
+  DT=`date +%D@%T`
+  echo "# $MYPROD nvram data :: written on $DT by init_script" > /tmp/nvram.cache
+  cat /etc/$MYPROD.nvram.template >> $NVRAM_CACHE
+  dd if=/dev/zero of=/dev/nvram bs=128 count=64 2>/dev/null
+  dd of=/dev/nvram if=$NVRAM_CACHE bs=128 count=64 >/dev/null 2>/dev/null
+  # seems like first boot - indicate this for later processing
+  touch /tmp/firstboot
+ fi
+
+#---------------------------------------------------------------------------
+

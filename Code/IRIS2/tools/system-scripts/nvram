@@ -1,0 +1,190 @@
+#!/bin/bash
+
+PRODUCT=`cat /etc/product`
+NVRAM_CACHE=/tmp/nvram.cache
+NVRAM_FILE=/dev/nvram
+
+validate_key_val()
+ {
+  if [ "$1" = "" ]
+   then
+    echo "error: invalid key"
+    exit 1
+   fi
+
+  if [ "$2" = "" ]
+   then
+    echo "error: invalid key value"
+    exit 1
+   fi
+ }
+
+refresh_nvram_cache()
+ {
+  dd if=/dev/nvram of=$NVRAM_CACHE bs=128 count=64 >/dev/null 2>/dev/null
+ }
+
+write_nvram_cache()
+ {
+  cat $NVRAM_CACHE | grep -v -e "^#" > $NVRAM_CACHE.tmp
+  DT=`date +%D@%T`
+  echo "# $PRODUCT nvram data :: written on $DT by nvram_script" > $NVRAM_CACHE
+  cat $NVRAM_CACHE.tmp >> $NVRAM_CACHE
+  dd if=/dev/zero of=/dev/nvram bs=128 count=64 >/dev/null 2>/dev/null
+  dd if=$NVRAM_CACHE of=/dev/nvram bs=128 count=64 >/dev/null 2>/dev/null
+ }
+
+write_nvram_etc_settings()
+ {
+  cp /etc/passwd /etc/settings
+  cp /etc/dropbear/dropbear_rsa_host_key /etc/settings
+  cp /etc/iris_websrv_key.pem /etc/settings
+  cp /etc/iris_websrv_cert.pem /etc/settings
+  cd /etc
+  tar -zcvf settings.tar.gz settings
+  mv settings.tar.gz /tmp
+
+  SETTINGS_SIZE=`ls -l /tmp/settings.tar.gz | awk '{print $5;}'`
+
+  echo "current settings size (compressed): $SETTINGS_SIZE out of 8192" 
+
+  if [ "$SETTINGS_SIZE" -gt 8192 ] 
+   then
+    echo "Settings archive is too big to fit in nvram! You have to reduce the size of config files! Aborting."
+    rm -f /tmp/settings.tar.gz
+    exit
+   fi
+
+  dd of=/dev/nvram if=/tmp/settings.tar.gz bs=128 seek=128 count=64 >/dev/null 2>/dev/null
+  rm /tmp/settings.tar.gz
+ }
+
+clear_nvram_cache()
+ {
+  cat $NVRAM_CACHE | grep -e \= -e \# > $NVRAM_CACHE.tmp
+  mv $NVRAM_CACHE.tmp $NVRAM_CACHE
+ }
+
+if [ "$1" = "get" ]  ## display all occurences of this key
+ then
+  cat $NVRAM_CACHE | grep $2 | awk 'BEGIN{FS="=";}{print $2;}'
+  exit
+ fi
+
+if [ "$1" = "set" ]  ## change first occurence of this key, or add new
+ then
+  KEY=`echo "$2" | awk 'BEGIN{FS="=";}{print $1;}'`
+  VAL=`echo "$2" | awk 'BEGIN{FS="=";}{printf $2; if($3!="") printf "="$3; if($4!="") printf "="$4; if($5!="") printf "="$5; if($6!="") printf "="$6; printf "\n";}'`
+  validate_key_val $KEY $VAL
+
+  KEY_COUNT=`cat $NVRAM_CACHE | grep $KEY | wc -l`
+  if [ $KEY_COUNT -gt 0 ]
+   then
+    cat $NVRAM_CACHE | awk -v key=$KEY -v val=$VAL 'BEGIN{FS="="; first=1;}{if(($1==key)&&first) {print key"="val; first=0;} else print;}' > $NVRAM_CACHE.tmp
+    mv $NVRAM_CACHE.tmp $NVRAM_CACHE
+   else
+    # just apped this to the end of nvram cache
+    echo "$KEY=$VAL" >> $NVRAM_CACHE
+  fi
+  exit
+ fi
+
+if [ "$1" = "add" ] ## add new key
+ then
+  KEY=`echo "$2" | awk 'BEGIN{FS="=";}{print $1;}'`
+  VAL=`echo "$2" | awk 'BEGIN{FS="=";}{print $2;}'`
+  validate_key_val $KEY $VAL
+
+  # just apped this to the end of nvram cache
+  echo "$KEY=$VAL" >> $NVRAM_CACHE
+  exit
+ fi
+
+if [ "$1" = "delete" ] ## delete first occurence of this key
+ then
+  KEY_COUNT=`cat $NVRAM_CACHE | grep "$2" | wc -l`
+  if [ $KEY_COUNT -gt 0 ]
+   then
+    cat $NVRAM_CACHE | awk -v av="$2" 'BEGIN{FS="="; first=1;split(av,a,"="); val=a[2];}{if($2==val){} else print;}' > $NVRAM_CACHE.tmp
+    mv $NVRAM_CACHE.tmp $NVRAM_CACHE
+   fi
+  exit
+ fi
+
+if [ "$1" = "cache" ]  ## copy nvram contents to cache file
+ then
+  refresh_nvram_cache
+  clear_nvram_cache
+  exit
+ fi
+
+if [ "$1" = "commit" ] ## commit cache to nvram
+ then
+  write_nvram_cache
+  exit
+ fi
+
+if [ "$1" = "commit_etc" ] ## commit /etc/settings to nvram
+ then
+  write_nvram_etc_settings
+  exit
+ fi
+
+if [ "$1" = "dump" ]   ## dump cache contents
+ then
+  cat /tmp/nvram.cache
+  exit
+ fi
+
+if [ "$1" = "realdump" ] ## dump real nvram contents
+ then
+  dd if=/dev/nvram bs=128 count=64 2>/dev/nul
+  exit
+ fi
+
+if [ "$1" = "reinit" ] ## load factory defaults (into variable area)
+ then
+  dd if=/dev/zero of=/dev/nvram bs=128 count=64 2>/dev/null
+  DT=`date +%D@%T`
+  echo "# $PRODUCT nvram data :: written on $DT by nvram_script" > /tmp/nvram.cache
+  cat /etc/$PRODUCT.nvram.template >> /tmp/nvram.cache
+  dd if=/tmp/nvram.cache of=/dev/nvram bs=128 count=64 2>/dev/null
+  echo "nvram reinitialized. defaults loaded."
+  exit
+ fi
+
+if [ "$1" = "zero_var" ] ## zeroize variable area
+ then
+  dd if=/dev/zero of=/dev/nvram bs=128 count=64 2>/dev/null
+  exit
+ fi
+
+if [ "$1" = "zero_rc" ] ## zeroize product rc script
+ then
+  dd if=/dev/zero of=/dev/nvram bs=128 count=64 skip=64 2>/dev/null
+  exit
+ fi
+
+if [ "$1" = "zero_settings" ] ## zeroize /etc/settings archive
+ then
+  dd if=/dev/zero of=/dev/nvram bs=128 count=64 skip=128 2>/dev/null
+  exit
+ fi
+
+if [ "$1" = "zero_persistence" ] ## zeroize persistence data
+ then
+  dd if=/dev/zero of=/dev/nvram bs=128 count=8 skip=192 2>/dev/null
+  exit
+ fi
+
+if [ "$1" = "zero_all" ] ## zeroize entire nvram 
+ then
+  dd if=/dev/zero of=/dev/nvram bs=128 count=196 2>/dev/null # clear persistence data also (somewhere above 192-nd block)
+  exit
+ fi
+
+
+echo "usage: nvram get|set|add|delete|cache|commit|commit_etc|commit_rc|dump|realdump|reinit|zero_var|zero_rc|zero_settings|zero_persistence|zero_all"
+
+# end of script
+
