@@ -389,9 +389,6 @@ void PL_keyboard_thread(void)
 
      keyboard_state = PL_keyboard_scan();
 
-     //if(keyboard_state)
-     // PL_debug("PL_keyboard_thread: keyboard_state > 0 : %d", keyboard_state);
-
      if(keyboard_state != prev_keyboard_state)
       {
        PL_debug("PL_keyboard_thread: new keyboard state: %d", keyboard_state);

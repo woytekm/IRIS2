@@ -92,7 +92,7 @@
 
 #define INTERNAL_AMP_CONTROL_PIN RPI_BPLUS_GPIO_J8_07
 
-#define KEYBOARD_POLLING_LOOP_USEC 6000
+#define KEYBOARD_POLLING_LOOP_USEC 3000
 
 #define ENOUGH_BUFFERING 600
 
@@ -348,6 +348,12 @@ typedef struct _radio_stream_t {
 
 radio_stream_t *G_streams[MAX_STREAMS];
 rss_feed_t *G_rss_feeds[MAX_RSS];
+
+uint8_t G_matrix_analyser_mode;
+uint8_t G_matrix_analyser_state;
+uint8_t G_matrix_analyser_color_scheme;
+uint8_t G_clear_matrix;
+uint8_t FFT_values_64_scaled[64];
 
 
 // include end

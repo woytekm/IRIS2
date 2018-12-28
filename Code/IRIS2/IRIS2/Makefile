@@ -1,6 +1,6 @@
 include ../Makefile.inc
 
-INCLUDES = $(TOPINCLUDES) -I ../include -I ../display -I ../tts -I ../system  -I ../clock -I ../setup -I ../rss  -I ../player -I ../keyboard -I ../config -I ../alarm -I ../wifi
+INCLUDES = $(TOPINCLUDES) -I ../include -I ../display -I ../tts -I ../system  -I ../clock -I ../setup -I ../rss  -I ../player -I ../keyboard -I ../config -I ../alarm -I ../wifi -I ../matrix
 
 all: $(MAIN_EXE)
 

@@ -4,9 +4,10 @@ INCLUDES = $(TOPINCLUDES) -I ../include
 
 all: libmatrix.a
 
-libmatrix.a: matrixlib.c
+libmatrix.a: matrixlib.c matrix-thread.c
 	$(CC) matrixlib.c -c $(INCLUDES)
-	$(AR) rcs libmatrix.a matrixlib.o
+	$(CC) matrix-thread.c -c $(INCLUDES)
+	$(AR) rcs libmatrix.a matrixlib.o matrix-thread.o
 
 clean:
 	rm -f *.o *.a 

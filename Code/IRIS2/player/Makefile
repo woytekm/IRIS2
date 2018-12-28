@@ -1,6 +1,6 @@
 include ../Makefile.inc
 
-INCLUDES= $(TOPINCLUDES) -I../display -I ../include -I ../tts
+INCLUDES= $(TOPINCLUDES) -I../display -I ../include -I ../tts -I ../matrix 
 
 LIBSEARCH= -L . -L ../display
 
