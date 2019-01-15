@@ -41,12 +41,40 @@ void PL_clock_thread(void)
 
    time_t now;
    unsigned char timestr[11];
-   uint8_t flip = 0, some_alarms_active, prev_hour = 25;
+   uint8_t flip = 0, some_alarms_active, prev_hour = 25,i;
    alarm_data_t *alarm;
    uint8_t TTS_thread_msg[2];
    
    while(1)
      {
+
+      time(&now);
+      G_tm = localtime(&now);
+
+      if(G_matrix_mode == MATRIX_MODE_CLOCK)
+       {
+         if(i == 1)
+          {
+            sprintf(timestr,"%02d:%02d",G_tm->tm_hour,G_tm->tm_min);
+            i = 0;
+          }
+         else
+          {
+            i = 1;
+            sprintf(timestr,"%02d %02d",G_tm->tm_hour,G_tm->tm_min);
+          }
+
+         m_clear();
+         m_setcursor(10,15);
+         m_writechar(timestr[0],1,18,0);
+         m_writechar(timestr[1],1,18,0);
+         m_writechar(timestr[2],1,18,0);
+         m_setcursor(34,15);
+         m_writechar(timestr[3],1,18,0);
+         m_writechar(timestr[4],1,18,0);
+         m_display();
+
+       }
 
       if(G_global_mode == GLOBAL_MODE_SETUP)
        {
@@ -54,9 +82,6 @@ void PL_clock_thread(void)
         continue;
        }
 
-      time(&now);
-      G_tm = localtime(&now);
-	  
       if(G_display_mode_lower_row == DISPLAY_MODE_CLOCK_DATE)
        {
         if(flip)

@@ -7,7 +7,7 @@ LIBSEARCH= -L . -L ../display
 all: libplayer.a
 
 libplayer.a: player-thread.c
-	$(CC) player-thread.c -g -c $(INCLUDES)
+	$(CC) player-thread.c -c $(CFLAGS) $(INCLUDES)
 	$(AR) rcs libplayer.a player-thread.o
 
 clean:

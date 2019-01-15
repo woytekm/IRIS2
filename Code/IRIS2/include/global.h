@@ -353,8 +353,12 @@ uint8_t G_matrix_analyser_mode;
 uint8_t G_matrix_analyser_state;
 uint8_t G_matrix_analyser_color_scheme;
 uint8_t G_clear_matrix;
-uint8_t FFT_values_64_scaled[64];
 
+uint8_t G_matrix_mode;
+
+#define MATRIX_MODE_CLOCK 1
+#define MATRIX_MODE_ANALYSER 2
+#define MATRIX_MODE_BLANK 3
 
 // include end
 

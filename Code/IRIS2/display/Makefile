@@ -5,7 +5,7 @@ INCLUDES = $(TOPINCLUDES) -I ../include
 all: libWEH001602.a
 
 libWEH001602.a: WEH001602-lib.c
-	$(CC) WEH001602-lib.c -c $(INCLUDES)
+	$(CC) WEH001602-lib.c -c $(CFLAGS) $(INCLUDES)
 	$(AR) rcs libWEH001602.a WEH001602-lib.o
 
 test:

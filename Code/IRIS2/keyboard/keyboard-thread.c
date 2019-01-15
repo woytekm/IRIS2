@@ -118,14 +118,14 @@ void PL_dispatch_keyboard_event(uint8_t keyboard_state)
 
   else if(keyboard_state == KEY_SNOOZE_CENTER)
    {
-	if((G_player_mode == PLAYER_STREAM) || (G_player_mode == ALARM_ACTIVE))
-	{
-     PL_debug("PL_dispatch_keyboard_event: SNOOZE_CENTER pressed and evaluated");
-     if(G_snooze_state == SNOOZE_INACTIVE)
-      G_snooze_state = SNOOZE_ACTIVE;
-     else G_snooze_state = SNOOZE_RESET;
-	}
-    
+    if((G_player_mode == PLAYER_STREAM) || (G_player_mode == ALARM_ACTIVE))
+     {
+      PL_debug("PL_dispatch_keyboard_event: SNOOZE_CENTER pressed and evaluated");
+      if(G_snooze_state == SNOOZE_INACTIVE)
+         G_snooze_state = SNOOZE_ACTIVE;
+      else G_snooze_state = SNOOZE_RESET;
+     }
+
    }
 
   else if((keyboard_state == KEY_RADIO_ONOFF_LONG) && (G_player_mode == PLAYER_STREAM))
@@ -370,7 +370,7 @@ void PL_dispatch_keyboard_event(uint8_t keyboard_state)
 void PL_keyboard_thread(void)
  {
 
-  uint8_t keyboard_state = 0, prev_keyboard_state = 0;
+  uint8_t keyboard_state = 0, prev_keyboard_state = 0, encoder_event;
   int setup_input_pipe;
 
   setup_input_pipe = G_setup_key_input[1];
@@ -404,6 +404,32 @@ void PL_keyboard_thread(void)
        prev_keyboard_state = keyboard_state;
 
       }
+
+     encoder_event = PL_get_encoder_event();
+
+     if(encoder_event != ENCODER_NO_EVENT)
+      if(G_global_mode != GLOBAL_MODE_SETUP)
+        switch (encoder_event)
+         {
+           case ENCODER_TURN_LEFT:
+                PL_dispatch_keyboard_event(KEY_VOL_DOWN);              
+                break;
+           case ENCODER_TURN_RIGHT:
+                PL_dispatch_keyboard_event(KEY_VOL_UP);
+                break;
+         }
+      else if(G_global_mode == GLOBAL_MODE_SETUP)
+        switch (encoder_event)
+         {
+           case ENCODER_TURN_LEFT:
+                keyboard_state = KEY_VOL_DOWN;
+                write(setup_input_pipe,&keyboard_state,1);
+                break;
+           case ENCODER_TURN_RIGHT:
+                keyboard_state = KEY_VOL_UP;
+                write(setup_input_pipe,&keyboard_state,1);
+                break;
+         }
 
      usleep(KEYBOARD_POLLING_LOOP_USEC);
 

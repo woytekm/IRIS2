@@ -8,6 +8,9 @@ enum keypad_keys { KEY1,KEY2,KEY3,KEY4,KEY5,KEY6,KEY7,KEY8 };
 #define KEYPAD_LATCH RPI_BPLUS_GPIO_J8_15
 #define KEYPAD_DATA RPI_BPLUS_GPIO_J8_16
 
+#define ENCODER_L RPI_BPLUS_GPIO_J8_11
+#define ENCODER_R RPI_BPLUS_GPIO_J8_07
+
 void PL_keyboard_thread(void);
 
 #define KEY_RADIO_ONOFF        1
@@ -31,8 +34,11 @@ void PL_keyboard_thread(void);
 #define KEY_DELAY_FAST 50
 #define KEY_DELAY_FASTER 20
 
-#define THRESHOLD1 100
-#define THRESHOLD2 500
-#define THRESHOLD3 1000
+#define THRESHOLD1 50
+#define THRESHOLD2 230
+#define THRESHOLD3 400
 
+#define ENCODER_TURN_RIGHT 1
+#define ENCODER_TURN_LEFT  2
+#define ENCODER_NO_EVENT   0
 

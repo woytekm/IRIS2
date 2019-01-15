@@ -222,17 +222,6 @@ void PL_player_thread(void)
        else
         output = AUDIO_OUT_DEFAULT; // this should be BT speaker
 
-      if((G_prev_output_device == AUDIO_OUT_INTERNAL) && (output == AUDIO_OUT_DEFAULT) && (G_config.volume_level > 0.80)) // automatically lower volume when going from internal speaker to bt speaker
-       {
-        PL_debug("PL_player_thread: detected switch from internal speaker to BT speaker - auto reducing volume to 0.76");
-        G_config.volume_level = 0.76;
-       }
-      else if((G_prev_output_device == AUDIO_OUT_DEFAULT) && (output == AUDIO_OUT_INTERNAL) && (G_config.volume_level < 0.85)) // automatically increase volume when going from bt to internal speaker
-       {
-        PL_debug("PL_player_thread: detected switch from BT speaker to internal - auto increasing volume to 0.86");
-        G_config.volume_level = 0.86;
-       }
-
       if(!G_BASS_in_use)
        if(!BASS_Init(output,44100,0,0,NULL))
         {
@@ -507,7 +496,7 @@ void PL_player_thread(void)
         BASS_ChannelStop(G_stream_chan);
       BASS_StreamFree(G_stream_chan);
 
-      if(G_matrix_analyser_state == MATRIX_ANALYSER_ON)
+      if(G_matrix_mode == MATRIX_MODE_ANALYSER)
        G_clear_matrix = 1;
 
       strcpy(G_current_stream_META," ");
@@ -539,7 +528,7 @@ void PL_player_thread(void)
       buffering_timer = 0;
 
       usleep(50000);  
-
+     
     }
  
    }

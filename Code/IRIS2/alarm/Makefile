@@ -7,7 +7,7 @@ LIBSEARCH= -L . -L ../display
 all: libalarm.a
 
 libalarm.a: alarm-thread.c
-	$(CC) alarm-thread.c -g -c $(INCLUDES)
+	$(CC) alarm-thread.c -c $(CFLAGS) $(INCLUDES)
 	$(AR) rcs libalarm.a alarm-thread.o
 
 clean:

@@ -7,7 +7,7 @@ LIBSEARCH= -L . -L ../display
 all: libwifi.a
 
 libwifi.a: wifi_signal.c
-	$(CC) wifi_signal.c -g -c $(INCLUDES)
+	$(CC) wifi_signal.c -c $(CFLAGS) $(INCLUDES)
 	$(AR) rcs libwifi.a wifi_signal.o
 
 clean:

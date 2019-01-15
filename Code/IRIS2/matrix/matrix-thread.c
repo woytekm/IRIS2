@@ -58,6 +58,7 @@ void PL_avg_FFT_256_to_64_with_16_scale(float *fft_256,uint8_t *fft_64_16)
 void PL_matrix_analyser_display(float *fft_buffer, uint8_t mode, uint8_t color_scheme)
  {
   uint8_t i,val;
+  uint8_t FFT_values_64_scaled[128]; // test! it should be 64!
 
   m_clear();
 
@@ -93,7 +94,7 @@ void PL_matrix_analyser_thread(void)
   m_set_brightness(5);
 
   G_matrix_analyser_mode = MATRIX_ANALYSER_MODE_MONO_HOLD;
-  G_matrix_analyser_state = MATRIX_ANALYSER_ON;
+  G_matrix_mode = MATRIX_MODE_ANALYSER;
   G_matrix_analyser_color_scheme = MATRIX_ANALYSER_COLOR_01;
   G_clear_matrix = 0;
 
@@ -109,7 +110,7 @@ void PL_matrix_analyser_thread(void)
        G_clear_matrix = 0;
       }
 
-     if((G_matrix_analyser_state == MATRIX_ANALYSER_ON) && (G_player_mode == PLAYER_STREAM))
+     if((G_matrix_mode == MATRIX_MODE_ANALYSER) && (G_player_mode == PLAYER_STREAM))
       {
 
        if(G_matrix_analyser_mode == MATRIX_ANALYSER_MODE_MONO_HOLD)
@@ -120,6 +121,13 @@ void PL_matrix_analyser_thread(void)
        PL_matrix_analyser_display(fft,G_matrix_analyser_mode,G_matrix_analyser_color_scheme);
        cleared = 0;
       }
+     else if(G_matrix_mode == MATRIX_MODE_BLANK)
+      {
+       m_clear();
+       m_display();
+       bzero(&fft,sizeof(fft));
+      }
+     // else if(G_matrix_mode == MATRIX_MODE_CLOCK) - serviced in plclock.c
 
      //usleep(15000);
      usleep(20000);

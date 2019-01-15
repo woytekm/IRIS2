@@ -5,9 +5,35 @@
 
 
 uint8_t G_keymap;
+uint8_t G_enc1save,G_enc2save;
 uint16_t G_key_interval_ctr[KEYS_NO] = {0,0,0,0,0,0,0,0};
 uint8_t G_keys[KEYS_NO] = {KEY1, KEY2, KEY3, KEY4, KEY5, KEY6, KEY7, KEY8};
 
+uint8_t PL_get_encoder_event(void)
+ {
+
+    uint8_t enc1,enc2,encoder_event;
+
+    encoder_event = ENCODER_NO_EVENT;
+
+    enc1 = bcm2835_gpio_lev(ENCODER_L);
+    enc2 = bcm2835_gpio_lev(ENCODER_R);
+
+    if((enc1 != G_enc1save) || (enc2 != G_enc2save))
+     {
+
+       if( (((enc1 == 1) && (G_enc1save == 0)) && ( enc2 == 1)) || (((enc1 == 0) && (G_enc1save == 1)) && (enc2 == 0)) )
+        encoder_event = ENCODER_TURN_LEFT;
+       if( (((enc2 == 1) && (G_enc2save == 0)) && ( enc1 == 1)) || (((enc2 == 0) && (G_enc2save == 1)) && (enc1 == 0)) )
+        encoder_event = ENCODER_TURN_RIGHT;
+
+       G_enc1save = enc1;
+       G_enc2save = enc2;
+     }
+
+  return encoder_event;
+
+ }
 
 uint8_t PL_keyboard_init(void)
  {
@@ -19,10 +45,15 @@ uint8_t PL_keyboard_init(void)
    bcm2835_gpio_fsel(KEYPAD_LATCH, BCM2835_GPIO_FSEL_OUTP);
    bcm2835_gpio_fsel(KEYPAD_CLK, BCM2835_GPIO_FSEL_OUTP);
 
+   bcm2835_gpio_fsel(ENCODER_R, BCM2835_GPIO_FSEL_INPT);
+   bcm2835_gpio_fsel(ENCODER_L, BCM2835_GPIO_FSEL_INPT);  
+
    bcm2835_gpio_write(KEYPAD_CLK, LOW);
    bcm2835_gpio_write(KEYPAD_LATCH, HIGH);
 
    usleep(1000);
+
+   G_enc1save,G_enc2save = 0;
 
    return 1;
 
@@ -34,24 +65,24 @@ void PL_keypad_shift_in(void)
   uint8_t keypad_bitmap = 0, keypad_input, keypad_save = 0, i;
   
   bcm2835_gpio_write(KEYPAD_LATCH, LOW);
-  usleep(1000);
+  usleep(600);
   bcm2835_gpio_write(KEYPAD_LATCH, HIGH);
-  usleep(1000);
+  usleep(600);
 
   i = 0;
   keypad_input = bcm2835_gpio_lev(KEYPAD_DATA);
   G_keys[i] = keypad_input;
 
-  usleep(1000);
+  usleep(600);
 
   for(i=1;i<8;i++)
    {
      bcm2835_gpio_write(KEYPAD_CLK, HIGH);
-     usleep(1000);
+     usleep(600);
      keypad_input = bcm2835_gpio_lev(KEYPAD_DATA);
      bcm2835_gpio_write(KEYPAD_CLK, LOW);
      G_keys[i] = keypad_input;
-     usleep(1000);
+     usleep(600);
    }
  }
 

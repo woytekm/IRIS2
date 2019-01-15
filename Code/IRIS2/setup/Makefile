@@ -9,7 +9,7 @@ all: libsetup.a
 
 
 libsetup.a: setup.c
-	$(CC) setup.c -g -c $(INCLUDES)
+	$(CC) setup.c -c $(CFLAGS) $(INCLUDES)
 	$(AR) rcs libsetup.a setup.o
 
 clean:

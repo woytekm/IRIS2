@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # /boot/config.txt:
 # dtoverlay=i2s-mmap
 # dtoverlay=rpi-dac
@@ -42,6 +44,8 @@ if [ "$TAS_ID" == "0x6c" ]
   exit
  fi
 
+echo " "
+
 echo "* setting oscillator factory trim..."
 
 i2cset -y 1 0x1b 0x1b 0x00
@@ -54,13 +58,31 @@ echo "* setting sub-channel mixer to 2.1 mode..."
 
 i2cset -y 1 0x1b 0x21 0x00 0x00 0x42 0x03 i
 
+echo "* muting all channels..."
+
+i2cset -y 1 0x1b 0x06 0x07
+
 echo "* exiting shutdown mode..."
 
 i2cset -y 1 0x1b 0x05 0x84
 
-echo "* setting gain to 0 db..."
+echo "* setting satellites gain..."
 
-i2cset -y 1 0x1b 0x07 0x5a
+i2cset -y 1 0x1b 0x08 0x25
+
+echo "* setting subwoofer gain..."
+
+i2cset -y 1 0x1b 0x09 0x10
+
+echo "* setting master volume..."
+
+i2cset -y 1 0x1b 0x07 0x35
+
+echo "* unmuting all channels..."
+
+i2cset -y 1 0x1b 0x06 0x00
 
 echo "* all done."
+
+
 
