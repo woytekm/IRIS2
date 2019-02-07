@@ -26,6 +26,11 @@ setup_menu_item_t *new_menu_item(setup_menu_item_t *prev_item, char *menu_title,
 
  }
 
+uint8_t PL_connect_bt_source(void)
+ {
+
+ }
+
 uint8_t PL_reconnect_wifi(void)
  {
   system("/usr/sbin/iris-restart-wifi.sh");
@@ -135,8 +140,14 @@ void init_setup_menu(void)
      next_item->next = new_menu_item(next_item,"[NTP server]", (void*)&G_config.ntp_server, VAR_TYPE_GET_STRING, 0, 15);
      next_item = next_item->next;
 
-     next_item->next = new_menu_item(next_item,"[BT speaker]", (void*)&G_config.use_bt, VAR_TYPE_GET_BOOL, 0, 0);
+     next_item->next = new_menu_item(next_item,"[BT speaker]", (void*)&G_config.bt_spk, VAR_TYPE_GET_BOOL, 0, 0);
      next_item = next_item->next;
+
+     if(!G_config.bt_spk)
+      {
+        next_item->next = new_menu_item(next_item,"[BT sink]", (void*)&G_config.bt_sink, VAR_TYPE_GET_BOOL, 0, 0);
+        next_item = next_item->next;
+      }
 
      next_item->next = new_menu_item(next_item,"[SSH access]", (void*)&G_config.ssh_access, VAR_TYPE_GET_BOOL, 0, 0);
      next_item = next_item->next;
@@ -155,12 +166,21 @@ void init_setup_menu(void)
    next_item->next = new_menu_item(next_item,"[Restart WiFi?]", (void*)&PL_reconnect_wifi, VAR_TYPE_EXEC, 0, 0);
    next_item = next_item->next;
 
-   if(G_config.use_bt)
+   if(G_config.bt_spk)
     {
      next_item->next = new_menu_item(next_item,"[Conn BT spkr?]", (void*)&PL_reconnect_bt_speaker, VAR_TYPE_EXEC, 0, 0);
      next_item = next_item->next;
 
      next_item->next = new_menu_item(next_item,"[Find BT spkr?]", (void*)&PL_discover_bt_speaker, VAR_TYPE_EXEC, 0, 0);
+     next_item = next_item->next;
+    }
+
+   if((!G_config.bt_spk) && (G_config.bt_sink))
+    {
+     next_item->next = new_menu_item(next_item,"[BT src]", (void*)&G_config.bt_source, VAR_TYPE_GET_STRING, 0, 0);
+     next_item = next_item->next;
+
+     next_item->next = new_menu_item(next_item,"[Conn BT src?]", (void*)&PL_connect_bt_source, VAR_TYPE_EXEC, 0, 0);
      next_item = next_item->next;
     }
 

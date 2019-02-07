@@ -37,7 +37,7 @@
 
 #define AUDIO_OUT_DEFAULT -1  // for ALSA bluetooth output 
 //#define AUDIO_OUT_INTERNAL 2  // BASS detects BCM2835 internal audio as #2
-#define AUDIO_OUT_INTERNAL 3  // I2S audio (?)
+#define AUDIO_OUT_INTERNAL 2  // I2S audio (?)
 
 #define WEBSRV_PORT 8443
 #define WEBSRV_KEY_FILE "/etc/iris_websrv_key.pem"
@@ -92,7 +92,7 @@
 
 #define INTERNAL_AMP_CONTROL_PIN RPI_BPLUS_GPIO_J8_07
 
-#define KEYBOARD_POLLING_LOOP_USEC 3000
+#define KEYBOARD_POLLING_LOOP_USEC 1000
 
 #define ENOUGH_BUFFERING 600
 
@@ -319,7 +319,9 @@ typedef struct _iris_config_t {
     uint8_t autoplay;
     unsigned char ntp_server[255];
     unsigned char timezone[255];   
-    uint8_t use_bt;
+    uint8_t bt_spk;
+    uint8_t bt_sink;
+    unsigned char bt_source[20];
     unsigned char bt_speaker[20];
     uint8_t debug;
     uint8_t wifi_signal_level_debug;
@@ -359,6 +361,9 @@ uint8_t G_matrix_mode;
 #define MATRIX_MODE_CLOCK 1
 #define MATRIX_MODE_ANALYSER 2
 #define MATRIX_MODE_BLANK 3
+
+#define ALSA_DEFAULT_OUT 2
+#define ALSA_DEFAULT_IN 1
 
 // include end
 

@@ -85,9 +85,9 @@ if [ "$WLAN_DRIVER" != "" ]
 
 /usr/sbin/generate_wpasupconf.sh $WIFI_TYPE $WIFI_SSID $WIFI_PSK > /etc/wpa_supplicant.conf
 
-USE_BLUETOOTH=`nvram get use_bt`
+USE_BT_SPK=`nvram get bt_spk`
 
-if [ "$USE_BLUETOOTH" = "1" ]
+if [ "$USE_BT_SPK" = "1" ]
  then
 
   /usr/local/bin/dbus-daemon --system
@@ -117,7 +117,7 @@ if [ -x $MYPROD_BINARY ]
 
 echo "$MYPROD started."
 
-if [ "$USE_BLUETOOTH" = "1" ]
+if [ "$USE_BT_SPK" = "1" ]
  then
    echo "Connecting BT speaker..."
    /usr/sbin/iris-connect-bt-speaker.sh

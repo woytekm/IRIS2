@@ -9,36 +9,54 @@
 
 void PL_avg_FFT_256_to_64_with_32_scale(float *fft_256,uint8_t *fft_64_32)
  {
-  uint16_t i,j=8;
+  uint16_t i,j=8,scaler,scaler_l1,scaler_l2;
   float wrk;
 
-  fft_64_32[0] = (uint8_t)(((fft_256[0]+fft_256[1])/2)*100);
-  fft_64_32[1] = (uint8_t)(((fft_256[2]+fft_256[3])/2)*100);
-  fft_64_32[2] = (uint8_t)(((fft_256[4]+fft_256[5])/2)*100);
-  fft_64_32[3] = (uint8_t)(((fft_256[6]+fft_256[7])/2)*100);
+  if(G_config.bt_sink)
+   {
+    scaler = 3000;
+    scaler_l1 = 800;
+    scaler_l2 = 1900;
+   }
+  else
+   {
+    scaler = 310;
+    scaler_l1 = 100;
+    scaler_l2 = 250;
+   }
 
-  fft_64_32[4] = (uint8_t)(((fft_256[8]+fft_256[9])/2)*250);
-  fft_64_32[5] = (uint8_t)(((fft_256[10]+fft_256[11])/2)*250);
-  fft_64_32[6] = (uint8_t)(((fft_256[12]+fft_256[13])/2)*250);
-  fft_64_32[7] = (uint8_t)(((fft_256[14]+fft_256[15])/2)*250);
+  fft_64_32[0] = (uint8_t)(((fft_256[0]+fft_256[1])/2)*scaler_l1);
+  fft_64_32[1] = (uint8_t)(((fft_256[2]+fft_256[3])/2)*scaler_l1);
+  fft_64_32[2] = (uint8_t)(((fft_256[4]+fft_256[5])/2)*scaler_l1);
+  fft_64_32[3] = (uint8_t)(((fft_256[6]+fft_256[7])/2)*scaler_l1);
+
+  fft_64_32[4] = (uint8_t)(((fft_256[8]+fft_256[9])/2)*scaler_l2);
+  fft_64_32[5] = (uint8_t)(((fft_256[10]+fft_256[11])/2)*scaler_l2);
+  fft_64_32[6] = (uint8_t)(((fft_256[12]+fft_256[13])/2)*scaler_l2);
+  fft_64_32[7] = (uint8_t)(((fft_256[14]+fft_256[15])/2)*scaler_l2);
+
+  if(G_config.bt_sink)
+    scaler = 3000;
+  else
+    scaler = 310;
 
   for(i=16; i<240; i = i+4)
    {
     wrk = (fft_256[i]+fft_256[i+1]+fft_256[i+2]+fft_256[i+3])/4;
-    fft_64_32[j] = (uint8_t)(wrk*310);
+    fft_64_32[j] = (uint8_t)(wrk*scaler);
     j++;
    }
 
-  fft_64_32[62] = (uint8_t)(((fft_256[238]+fft_256[239]+fft_256[240]+fft_256[241]+fft_256[242]+fft_256[243]+fft_256[244]+fft_256[245])/8)*310);
-  fft_64_32[63] = (uint8_t)(((fft_256[246]+fft_256[247]+fft_256[248]+fft_256[249]+fft_256[250]+fft_256[251]+fft_256[252]+fft_256[253])/8)*310);
-  fft_64_32[64] = (uint8_t)(fft_256[254]*310);
+  fft_64_32[62] = (uint8_t)(((fft_256[238]+fft_256[239]+fft_256[240]+fft_256[241]+fft_256[242]+fft_256[243]+fft_256[244]+fft_256[245])/8)*scaler);
+  fft_64_32[63] = (uint8_t)(((fft_256[246]+fft_256[247]+fft_256[248]+fft_256[249]+fft_256[250]+fft_256[251]+fft_256[252]+fft_256[253])/8)*scaler);
+  fft_64_32[64] = (uint8_t)(fft_256[254]*scaler);
 
  }
 
 
 void PL_avg_FFT_256_to_64_with_16_scale(float *fft_256,uint8_t *fft_64_16)
  {
-  uint16_t i,j=0;
+  uint16_t i,j=0,scaler;
   float wrk;
 
   fft_64_16[j++] = (fft_256[0]+fft_256[1])/2;
@@ -46,10 +64,15 @@ void PL_avg_FFT_256_to_64_with_16_scale(float *fft_256,uint8_t *fft_64_16)
   fft_64_16[j++] = (fft_256[4]+fft_256[5])/2;
   fft_64_16[j++] = (fft_256[6]+fft_256[7])/2;
 
+  if(G_config.bt_sink)
+    scaler = 400;
+  else
+    scaler = 160;
+
   for(i=8; i<247; i = i+4)
    {
     wrk = (fft_256[i]+fft_256[i+1]+fft_256[i+2]+fft_256[i+3])/4;
-    fft_64_16[j] = (uint8_t)(wrk*160);
+    fft_64_16[j] = (uint8_t)(wrk*scaler);
     j++;
    }
 
@@ -77,7 +100,6 @@ void PL_matrix_analyser_display(float *fft_buffer, uint8_t mode, uint8_t color_s
       m_putpixel(i,(31-val),19);
      }
    }
-
   m_display();
 
  }
@@ -101,7 +123,7 @@ void PL_matrix_analyser_thread(void)
   while(1)
    {
 
-     if(((G_player_mode != PLAYER_STREAM) && (!cleared)) || G_clear_matrix )
+     if((((G_player_mode != PLAYER_STREAM)&&(!G_config.bt_sink)) && (!cleared)) || G_clear_matrix )
       {
        m_clear();
        m_display();
@@ -110,7 +132,7 @@ void PL_matrix_analyser_thread(void)
        G_clear_matrix = 0;
       }
 
-     if((G_matrix_mode == MATRIX_MODE_ANALYSER) && (G_player_mode == PLAYER_STREAM))
+     if((G_matrix_mode == MATRIX_MODE_ANALYSER) && ((G_player_mode == PLAYER_STREAM) || (G_config.bt_sink)) )
       {
 
        if(G_matrix_analyser_mode == MATRIX_ANALYSER_MODE_MONO_HOLD)

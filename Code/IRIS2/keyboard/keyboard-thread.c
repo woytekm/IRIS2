@@ -130,21 +130,32 @@ void PL_dispatch_keyboard_event(uint8_t keyboard_state)
 
   else if((keyboard_state == KEY_RADIO_ONOFF_LONG) && (G_player_mode == PLAYER_STREAM))
    {
-    if(G_sleep_timer_active)
+    if(G_config.bt_sink)
      {
-      G_sleep_timer_active = 0; G_sleep_timer_counter = 0;
       pthread_mutex_lock(&G_display_lock);
-      my_spi_WEH001602_out_text_at_col(BOTTOM_ROW, 13, " \0");  // clear "sleep timer active" indicator
+      my_spi_WEH001602_out_text_at_col(TOP_ROW, 0, "BT Sink active");
+      sleep(1);
+      my_spi_WEH001602_out_text_at_col(TOP_ROW, 0, "                ");
       pthread_mutex_unlock(&G_display_lock);
-      PL_debug("PL_dispatch_keyboard_event: sleep timer deactivated");
      }
     else
      {
-      G_sleep_timer_active = 1; G_sleep_timer_counter = 0;
-      pthread_mutex_lock(&G_display_lock);
-      my_spi_WEH001602_out_text_at_col(BOTTOM_ROW, 13, "\x04\0");  // set "sleep timer active" indicator
-      pthread_mutex_unlock(&G_display_lock);
-      PL_debug("PL_dispatch_keyboard_event: sleep timer activated");
+      if(G_sleep_timer_active)
+       {
+         G_sleep_timer_active = 0; G_sleep_timer_counter = 0;
+         pthread_mutex_lock(&G_display_lock);
+         my_spi_WEH001602_out_text_at_col(BOTTOM_ROW, 13, " \0");  // clear "sleep timer active" indicator
+         pthread_mutex_unlock(&G_display_lock);
+         PL_debug("PL_dispatch_keyboard_event: sleep timer deactivated");
+        }
+      else
+        {
+         G_sleep_timer_active = 1; G_sleep_timer_counter = 0;
+         pthread_mutex_lock(&G_display_lock);
+         my_spi_WEH001602_out_text_at_col(BOTTOM_ROW, 13, "\x04\0");  // set "sleep timer active" indicator
+         pthread_mutex_unlock(&G_display_lock);
+         PL_debug("PL_dispatch_keyboard_event: sleep timer activated");
+        }
      }
    }
 
@@ -215,40 +226,50 @@ void PL_dispatch_keyboard_event(uint8_t keyboard_state)
 
  else if(keyboard_state == KEY_RADIO_ONOFF)
    {
-    if(G_player_mode == PLAYER_STREAM)
+    if(G_config.bt_sink)
      {
-      G_player_mode = PLAYER_STOP;
-      G_sleep_timer_active = 0;
-      G_sleep_timer_counter = 0;
-      G_snooze_state = SNOOZE_RESET;
-
       pthread_mutex_lock(&G_display_lock);
-      my_spi_WEH001602_out_text_at_col(BOTTOM_ROW, 13, " \0");  // clear "sleep timer active" indicator
+      my_spi_WEH001602_out_text_at_col(TOP_ROW, 0, "BT Sink active");
+      sleep(1);
+      my_spi_WEH001602_out_text_at_col(TOP_ROW, 0, "                ");
       pthread_mutex_unlock(&G_display_lock);
-
-      if(G_scroll_meta_active)
-       G_kill_meta_scroll = 1;
      }
-    else if(G_player_mode == PLAYER_STOP)
+    else
      {
-      if(G_stream_count > 0)
-       G_player_mode = PLAYER_STREAM;
-      else
-      {
+      if(G_player_mode == PLAYER_STREAM)
+       {
+        G_player_mode = PLAYER_STOP;
+        G_sleep_timer_active = 0;
+        G_sleep_timer_counter = 0;
+        G_snooze_state = SNOOZE_RESET;
+
         pthread_mutex_lock(&G_display_lock);
-        my_spi_WEH001602_out_text(TOP_ROW,"                ");
-        my_spi_WEH001602_out_text(TOP_ROW,"[ no stations! ]");
-        usleep(70000);
-        my_spi_WEH001602_out_text(TOP_ROW,"                ");
+        my_spi_WEH001602_out_text_at_col(BOTTOM_ROW, 13, " \0");  // clear "sleep timer active" indicator
         pthread_mutex_unlock(&G_display_lock);
-        return;
-      }
 
-     }
-    else if(G_player_mode == ALARM_ACTIVE)
-     {
-       G_player_mode = PLAYER_STOP;
-     }
+        if(G_scroll_meta_active)
+         G_kill_meta_scroll = 1;
+       }
+      else if(G_player_mode == PLAYER_STOP)
+       {
+        if(G_stream_count > 0)
+          G_player_mode = PLAYER_STREAM;
+        else
+         {
+           pthread_mutex_lock(&G_display_lock);
+           my_spi_WEH001602_out_text(TOP_ROW,"                ");
+           my_spi_WEH001602_out_text(TOP_ROW,"[ no stations! ]");
+           usleep(70000);
+           my_spi_WEH001602_out_text(TOP_ROW,"                ");
+           pthread_mutex_unlock(&G_display_lock);
+           return;
+         }
+       }
+      else if(G_player_mode == ALARM_ACTIVE)
+       {
+        G_player_mode = PLAYER_STOP;
+       }
+      }
 
    }
 

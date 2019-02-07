@@ -12,7 +12,7 @@ void PL_bt_indicator(void)
    while(1)
     {
 
-     if( (G_global_mode == GLOBAL_MODE_NORMAL) && G_config.use_bt)
+     if( (G_global_mode == GLOBAL_MODE_NORMAL) && G_config.bt_spk)
       {
         system("/usr/sbin/iris-check-bt-speaker.sh");    
 

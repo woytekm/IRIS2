@@ -86,8 +86,10 @@ void PL_init(void)
   G_config.websrv_mode = WEBSRV_SECURE;
   G_config.basic_menu = 0;
   G_config.debug = 0;
-  G_config.use_bt = 0;
+  G_config.bt_spk = 0;
+  G_config.bt_sink = 0;
   G_config.bt_speaker[0] = 0x0;
+  G_config.bt_source[0] = 0x0;
   G_config.autoplay = 0;
   G_config.tts_speed = 100;
   G_config.tts_pitch = 100;

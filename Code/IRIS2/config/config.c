@@ -320,7 +320,11 @@ uint8_t PL_build_config(unsigned char *config_buffer)
   sprintf(&config_buffer[config_buffer_pos],"%s",config_line);
   config_buffer_pos += strlen(config_line);
 
-  sprintf(config_line,"use_bt=%d\n",G_config.use_bt);
+  sprintf(config_line,"bt_spk=%d\n",G_config.bt_spk);
+  sprintf(&config_buffer[config_buffer_pos],"%s",config_line);
+  config_buffer_pos += strlen(config_line);
+
+  sprintf(config_line,"bt_sink=%d\n",G_config.bt_sink);
   sprintf(&config_buffer[config_buffer_pos],"%s",config_line);
   config_buffer_pos += strlen(config_line);
 
@@ -339,6 +343,13 @@ uint8_t PL_build_config(unsigned char *config_buffer)
   if(strlen(G_config.bt_speaker) >= 10)
    {
     sprintf(config_line,"bt_speaker=%s\n",G_config.bt_speaker);
+    sprintf(&config_buffer[config_buffer_pos],"%s",config_line);
+    config_buffer_pos += strlen(config_line);
+   }
+
+  if(strlen(G_config.bt_source) >= 10)
+   {
+    sprintf(config_line,"bt_source=%s\n",G_config.bt_source);
     sprintf(&config_buffer[config_buffer_pos],"%s",config_line);
     config_buffer_pos += strlen(config_line);
    }
@@ -505,6 +516,8 @@ void PL_parse_config_av(unsigned char *avpair)
    if((attrib_val_present) && (strlen(value) > 0))
     {
 
+     PL_debug("PL_parse_config_av: attirb value: %d",attrib);
+
      switch(attrib)
      {
 
@@ -579,16 +592,28 @@ void PL_parse_config_av(unsigned char *avpair)
        PL_debug("PL_parse_config_av: parsed time telling flag: %d",G_config.tell_time_when_on);
        break;
 
-      case CONFIG_ATTR_USE_BT:
+      case CONFIG_ATTR_BT_SPK:
        tmp_val = atoi(value);
        if((tmp_val == 0) || (tmp_val == 1))
-        G_config.use_bt = tmp_val;
-       PL_debug("PL_parse_config_av: parsed use bluetooth flag: %d",G_config.use_bt);
+        G_config.bt_spk = tmp_val;
+       PL_debug("PL_parse_config_av: parsed use bluetooth speaker flag: %d",G_config.bt_spk);
+       break;
+
+      case CONFIG_ATTR_BT_SINK:
+       tmp_val = atoi(value);
+       if((tmp_val == 0) || (tmp_val == 1))
+        G_config.bt_sink = tmp_val;
+       PL_debug("PL_parse_config_av: parsed bluetooth sink flag: %d",G_config.bt_sink);
        break;
 
       case CONFIG_ATTR_BT_SPEAKER:
        strncpy(G_config.bt_speaker,value,20);
        PL_debug("PL_parse_config_av: parsed bluetooth speaker address: [%s]",G_config.bt_speaker);
+       break;
+
+      case CONFIG_ATTR_BT_SOURCE:
+       strncpy(G_config.bt_source,value,20);
+       PL_debug("PL_parse_config_av: parsed bluetooth source address: [%s]",G_config.bt_source);
        break;
 
       case CONFIG_ATTR_TIMEZONE:

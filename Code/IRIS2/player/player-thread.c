@@ -86,6 +86,11 @@ void PL_player_display_thread(void)
         G_vu_active = 0;
        }
 
+     if((G_config.bt_sink) && (G_player_mode == PLAYER_STOP))
+       {
+        my_spi_WEH001602_scroll_meta_once("BT Sink active", TOP_ROW);
+        sleep(1);
+       }
      if((G_display_mode_upper_row ==  DISPLAY_MODE_PLAYER_META) && (G_player_mode == PLAYER_STREAM))
        {
         meta_copy = strdup(G_current_stream_META);
@@ -175,18 +180,26 @@ void PL_BASS_parse_meta(HSYNC handle, DWORD G_stream_channel, DWORD data, void *
   else 
    strcpy(G_current_stream_META,'\0');
  } 
+
+BOOL PL_RecordProc(HRECORD handle, const void *buffer, DWORD length, void *user)
+{
+    BASS_StreamPutData(G_stream_chan, buffer, length); // pass the data to the stream
+    return TRUE; // continue recording
+}
  
 void PL_player_thread(void)
  {
   DWORD act,time,level,buffer_fill,buffer_fill_prev,buffering_timer;
   BOOL ismod;
   QWORD pos;
-  uint8_t playing, current_stream_index, failure_count = 0, cant_init = 0;
+  uint8_t playing, bt_sink_inited, current_stream_index, failure_count = 0, cant_init = 0;
   int BASS_err = 0;
   uint16_t tag_check_interval = 0, additional_init_delay = 0;
   const char *http_tags, *stream_tags, *other_tags, *p, *p1, *icy_name;
   uint8_t used_internal_spk = 0;
   int8_t output;
+  
+  HRECORD rchan;
  
   PL_debug("PL_player_thread: starting");
  
@@ -200,11 +213,47 @@ void PL_player_thread(void)
     {       
 
       playing = 0;
+      bt_sink_inited = 0;
  
       G_prev_volume_level = G_config.volume_level;
 
-      while(G_player_mode!=PLAYER_STREAM)
+      while((G_player_mode!=PLAYER_STREAM) && (!G_config.bt_sink))
        usleep(60*1000); 
+
+      while(G_config.bt_sink)
+       {
+        if(!bt_sink_inited)
+         {
+          output = AUDIO_OUT_INTERNAL;
+          BASS_Init(output,44100,0,0,NULL);
+          BASS_RecordInit(0);
+          BASS_RecordSetInput(0,BASS_INPUT_ON,1);
+          rchan=BASS_RecordStart(44100,2,0,&PL_RecordProc,0);
+          G_stream_chan = BASS_StreamCreate(44100, output, 0, STREAMPROC_PUSH, NULL);
+          G_config.volume_level = 0.10;        // turn down volume on bluetooth sink as we don't know what is set on bluetooth source
+          BASS_ChannelSetAttribute(G_stream_chan,BASS_ATTRIB_VOL,G_config.volume_level);
+          BASS_ChannelPlay(G_stream_chan,0);
+          bt_sink_inited = 1;
+         }
+
+        if(G_config.volume_level != G_prev_volume_level)
+          BASS_ChannelSetAttribute(G_stream_chan,BASS_ATTRIB_VOL,G_config.volume_level);
+
+        G_prev_volume_level = G_config.volume_level;
+
+        usleep(90*1000);
+       }
+      if(bt_sink_inited)
+       {
+        BASS_ChannelStop(rchan);
+        BASS_RecordFree();
+        BASS_ChannelStop(G_stream_chan); 
+        BASS_StreamFree(G_stream_chan);
+        BASS_Free();
+        bt_sink_inited = 0;
+        G_config.volume_level = 0.40;        // set volume back to some sane level for internet streams
+        continue;
+       }
     
       pthread_mutex_lock(&G_display_lock);
       my_spi_WEH001602_out_text_at_col(BOTTOM_ROW, 15, "\xf6\0"); // arrow indicating that stream start command was received
@@ -464,6 +513,14 @@ void PL_player_thread(void)
         PL_debug("PL_player_thread: bufering takes too long - restarting stream");
         break;
        }
+
+     if(G_config.bt_sink) // BT Sink engaged
+      {
+       G_player_mode = PLAYER_STOP;
+       G_sleep_timer_active = 0;
+       G_sleep_timer_counter = 0;
+       G_snooze_state = SNOOZE_RESET;
+      }
 
      buffer_fill_prev = buffer_fill;
 

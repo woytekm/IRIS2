@@ -78,7 +78,7 @@ main(int argc, char **argv)
 
   G_iris_tasks[TASK_PERSISTENCE] = PL_start_task(TASK_PERSISTENCE, PL_persistence_thread, NULL, SCHED_BATCH,0);
 
-  if(!G_config.use_bt)
+  if(!G_config.bt_spk)
    sleep(4);
   else
    sleep(20);  // we are trying to connect with BT speaker now - wait a bit more
