@@ -92,7 +92,7 @@
 
 #define INTERNAL_AMP_CONTROL_PIN RPI_BPLUS_GPIO_J8_07
 
-#define KEYBOARD_POLLING_LOOP_USEC 1000
+#define KEYBOARD_POLLING_LOOP_USEC 4000
 
 #define ENOUGH_BUFFERING 600
 
@@ -328,6 +328,7 @@ typedef struct _iris_config_t {
     uint8_t tts_speed;
     uint8_t tts_pitch;
     uint8_t tts_volume;
+    uint8_t matrix_brightness;
 } iris_config_t;
 
 iris_config_t G_config;
@@ -354,6 +355,7 @@ rss_feed_t *G_rss_feeds[MAX_RSS];
 uint8_t G_matrix_analyser_mode;
 uint8_t G_matrix_analyser_state;
 uint8_t G_matrix_analyser_color_scheme;
+uint8_t G_matrix_brightness;
 uint8_t G_clear_matrix;
 
 uint8_t G_matrix_mode;

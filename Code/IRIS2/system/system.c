@@ -71,6 +71,8 @@ void PL_init(void)
 
   G_wakeup = 0;
 
+  G_config.matrix_brightness = 5;
+
   strcpy(G_config.wireless_ssid,"none");
   strcpy(G_config.wireless_password,"none");
   strcpy(G_config.wireless_driver," "); // leave this at autodetect

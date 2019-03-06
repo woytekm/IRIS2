@@ -19,19 +19,16 @@ uint8_t PL_get_encoder_event(void)
     enc1 = bcm2835_gpio_lev(ENCODER_L);
     enc2 = bcm2835_gpio_lev(ENCODER_R);
 
-    if((enc1 != G_enc1save) || (enc2 != G_enc2save))
+    if((G_enc1save == 0) && (enc1 == 1))
      {
-
-       if( (((enc1 == 1) && (G_enc1save == 0)) && ( enc2 == 1)) || (((enc1 == 0) && (G_enc1save == 1)) && (enc2 == 0)) )
+       if(enc2 == 1)
         encoder_event = ENCODER_TURN_LEFT;
-       if( (((enc2 == 1) && (G_enc2save == 0)) && ( enc1 == 1)) || (((enc2 == 0) && (G_enc2save == 1)) && (enc1 == 0)) )
+       else if(enc2 == 0)
         encoder_event = ENCODER_TURN_RIGHT;
-
-       G_enc1save = enc1;
-       G_enc2save = enc2;
      }
 
-  return encoder_event;
+   G_enc1save = enc1;
+   return encoder_event;
 
  }
 

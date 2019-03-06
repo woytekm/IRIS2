@@ -412,7 +412,7 @@ void PL_keyboard_thread(void)
 
      if(keyboard_state != prev_keyboard_state)
       {
-       PL_debug("PL_keyboard_thread: new keyboard state: %d", keyboard_state);
+       //PL_debug("PL_keyboard_thread: new keyboard state: %d", keyboard_state);
        if(G_global_mode == GLOBAL_MODE_SETUP)
         {
          write(setup_input_pipe,&keyboard_state,1); // if we are in setup mode - pass keystroke to setup thread

@@ -3,6 +3,7 @@
 #include "WEH001602-lib.h"
 #include "tts.h"
 #include "matrix.h"
+#include "bass.h"
 
 
 void PL_set_internal_amp(uint8_t mode)
@@ -224,15 +225,24 @@ void PL_player_thread(void)
        {
         if(!bt_sink_inited)
          {
+          PL_debug("PL_player_thread: bluetooth sink init.");
           output = AUDIO_OUT_INTERNAL;
+          BASS_err = BASS_ErrorGetCode();
           BASS_Init(output,44100,0,0,NULL);
-          BASS_RecordInit(0);
+          PL_debug("PL_player_thread: bluetooth sink init: output init: %d",BASS_err);
+          BASS_err = BASS_ErrorGetCode();
+          BASS_RecordInit(0); // default record device should be Bluealsa driven BT sink. Bluetooth connect, pairing, and other stuff will be in separate thread.
+          PL_debug("PL_player_thread: bluetooth sink init: input init: %d",BASS_err);
           BASS_RecordSetInput(0,BASS_INPUT_ON,1);
           rchan=BASS_RecordStart(44100,2,0,&PL_RecordProc,0);
+          BASS_err = BASS_ErrorGetCode();
+          PL_debug("PL_player_thread: bluetooth sink init: input start: %d",BASS_err);
           G_stream_chan = BASS_StreamCreate(44100, output, 0, STREAMPROC_PUSH, NULL);
           G_config.volume_level = 0.10;        // turn down volume on bluetooth sink as we don't know what is set on bluetooth source
           BASS_ChannelSetAttribute(G_stream_chan,BASS_ATTRIB_VOL,G_config.volume_level);
+          BASS_err = BASS_ErrorGetCode();
           BASS_ChannelPlay(G_stream_chan,0);
+          PL_debug("PL_player_thread: bluetooth sink init: output start: %d",BASS_err);
           bt_sink_inited = 1;
          }
 
@@ -245,6 +255,7 @@ void PL_player_thread(void)
        }
       if(bt_sink_inited)
        {
+        PL_debug("PL_player_thread: bluetooth sink stop.");
         BASS_ChannelStop(rchan);
         BASS_RecordFree();
         BASS_ChannelStop(G_stream_chan); 

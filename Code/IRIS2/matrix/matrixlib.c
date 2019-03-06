@@ -239,7 +239,7 @@ void m_writechar(uint8_t c, uint8_t textsize, uint16_t textcolor, uint16_t textb
 void m_display(void)
  {
   mi_commit_edit_buffer();
-  mi_matrix_edit_buffer[MATRIXBUFLEN-1] = mi_brightness;
+  mi_matrix_commit_buffer[MATRIXBUFLEN-1] = mi_brightness;
   mi_commit_to_matrix();
  }
 

@@ -33,6 +33,7 @@ void PL_persistence_thread(void);
 #define CONFIG_ATTR_TTS_PITCH 978
 #define CONFIG_ATTR_TTS_VOL 1106
 #define CONFIG_ATTR_TELL_TIME 959
+#define CONFIG_ATTR_MATRIX_BRIGHTNESS 1837
 
 // end
 

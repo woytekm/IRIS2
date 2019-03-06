@@ -108,6 +108,9 @@ void init_setup_menu(void)
    next_item->next = new_menu_item(next_item,"[Tell time]", (void*)&G_config.tell_time_when_on, VAR_TYPE_GET_UINT8, 0, 2);
    next_item = next_item->next;
 
+   next_item->next = new_menu_item(next_item,"[Matrix dim]", (void*)&G_config.matrix_brightness, VAR_TYPE_GET_UINT8, 1, 9);
+   next_item = next_item->next;
+
    if(!G_config.basic_menu)
     {
      next_item->next = new_menu_item(next_item,"[WiFi SSID]", (void*)&G_config.wireless_ssid, VAR_TYPE_GET_STRING, 0, 15);

@@ -340,6 +340,10 @@ uint8_t PL_build_config(unsigned char *config_buffer)
   sprintf(&config_buffer[config_buffer_pos],"%s",config_line);
   config_buffer_pos += strlen(config_line);
 
+  sprintf(config_line,"matrix_brightness=%d\n",G_config.matrix_brightness);
+  sprintf(&config_buffer[config_buffer_pos],"%s",config_line);
+  config_buffer_pos += strlen(config_line);
+
   if(strlen(G_config.bt_speaker) >= 10)
    {
     sprintf(config_line,"bt_speaker=%s\n",G_config.bt_speaker);
@@ -689,6 +693,11 @@ void PL_parse_config_av(unsigned char *avpair)
       case CONFIG_ATTR_AUTOPLAY:
        G_config.autoplay = atoi(value);
        PL_debug("PL_parse_config_av: parsed autoplay flag: %d",G_config.autoplay);
+       break;
+
+      case CONFIG_ATTR_MATRIX_BRIGHTNESS:
+       G_config.matrix_brightness = atoi(value);
+       PL_debug("PL_parse_config_av: parsed matrix brightness value: %d",G_config.matrix_brightness);
        break;
 
       case CONFIG_ATTR_TTS_SPEED:

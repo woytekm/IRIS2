@@ -113,7 +113,7 @@ void PL_matrix_analyser_thread(void)
   uint8_t cleared = 0;
 
   m_init();
-  m_set_brightness(5);
+  m_set_brightness(G_config.matrix_brightness);
 
   G_matrix_analyser_mode = MATRIX_ANALYSER_MODE_MONO_HOLD;
   G_matrix_mode = MATRIX_MODE_ANALYSER;
@@ -139,6 +139,8 @@ void PL_matrix_analyser_thread(void)
         BASS_ChannelGetData(G_stream_chan, fft, BASS_DATA_FFT512);
        if(G_matrix_analyser_mode == MATRIX_ANALYSER_MODE_STEREO_HOLD)
         BASS_ChannelGetData(G_stream_chan, fft, BASS_DATA_FFT512|BASS_DATA_FFT_INDIVIDUAL);
+
+       m_set_brightness(G_config.matrix_brightness);
 
        PL_matrix_analyser_display(fft,G_matrix_analyser_mode,G_matrix_analyser_color_scheme);
        cleared = 0;
