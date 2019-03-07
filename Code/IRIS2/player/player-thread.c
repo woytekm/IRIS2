@@ -6,20 +6,6 @@
 #include "bass.h"
 
 
-void PL_set_internal_amp(uint8_t mode)
- {
-   if(mode==1)
-    {
-     bcm2835_gpio_write(INTERNAL_AMP_CONTROL_PIN, HIGH);    
-     G_internal_amp_active = 1;
-    }
-   else if(mode==0)
-    {
-     bcm2835_gpio_write(INTERNAL_AMP_CONTROL_PIN, LOW);
-     G_internal_amp_active = 0;
-    }
- }
-
 void PL_disp_channel_VU(uint8_t row, uint8_t left_level, uint8_t right_level)
  {
    int8_t i,j=0,chr;
@@ -272,10 +258,10 @@ void PL_player_thread(void)
   
       // setup output device
 
-       if((!G_internal_amp_active)&&(!G_bt_connected))
+       if((!G_amp_active)&&(!G_bt_connected))
         {
          PL_debug("PL_player_thread: turning on internal speaker amp");
-         PL_set_internal_amp(1);
+         PL_set_amp(1);
          used_internal_spk = 1;
          output = AUDIO_OUT_INTERNAL;
         }
@@ -586,7 +572,7 @@ void PL_player_thread(void)
         if(used_internal_spk)
          {
           PL_debug("PL_player_thread: turning off internal speaker");
-          PL_set_internal_amp(0);
+          PL_set_amp(0);
           used_internal_spk = 0;
          }
        }

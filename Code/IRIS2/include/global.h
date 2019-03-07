@@ -177,7 +177,7 @@ pthread_mutex_t G_display_lock;
 uint8_t G_debug_info_active;
 FILE *G_logfile_handle;
 
-uint8_t G_internal_amp_active;
+uint8_t G_amp_active;
 
 struct tm *G_tm;
 

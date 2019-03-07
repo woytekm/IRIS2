@@ -48,9 +48,8 @@ void PL_init(void)
 
   G_display_mode_save = G_display_mode_upper_row;
 
-  bcm2835_gpio_fsel(INTERNAL_AMP_CONTROL_PIN, BCM2835_GPIO_FSEL_OUTP);
-  G_internal_amp_active = 0;  // should be turned off at startup
-  PL_set_internal_amp(0);
+  G_amp_active = 0;  // should be turned off at startup
+  PL_set_amp(0);
 
   pipe(G_setup_key_input);
   pipe(G_TTS_thread_input);

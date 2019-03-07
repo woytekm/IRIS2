@@ -68,9 +68,9 @@ void PL_TTS_play_rss_items(rss_item_t *rss_list_start)
 
   current_item = rss_list_start;
  
-  if((!G_internal_amp_active)&&(!G_bt_connected))
+  if((!G_amp_active)&&(!G_bt_connected))
    {
-    PL_set_internal_amp(1);
+    PL_set_amp(1);
     used_internal_spk = 1;
     output = AUDIO_OUT_INTERNAL;
    }
@@ -118,7 +118,7 @@ void PL_TTS_play_rss_items(rss_item_t *rss_list_start)
    {
     BASS_Free();
     if(used_internal_spk)
-     PL_set_internal_amp(0);
+     PL_set_amp(0);
    }
 
  }
@@ -239,9 +239,9 @@ void PL_TTS_thread(void)
      if(TTS_msg[0] == TTS_SAY_CURRENT_TIME)
       {
 
-        if((!G_internal_amp_active)&&(!G_bt_connected))
+        if((!G_amp_active)&&(!G_bt_connected))
          {
-          PL_set_internal_amp(1);
+          PL_set_amp(1);
           used_internal_spk = 1;
           output = AUDIO_OUT_INTERNAL;
          }
@@ -283,7 +283,7 @@ void PL_TTS_thread(void)
           BASS_Free();
           if(used_internal_spk)
            {
-            PL_set_internal_amp(0);
+            PL_set_amp(0);
             used_internal_spk = 0;
            }
          }

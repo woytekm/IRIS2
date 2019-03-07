@@ -1,0 +1,11 @@
+// pin mappings are for "WM Project AMP 0.1 v3 2.1" HAT Board 
+
+#define AMP_TAS5721_HEADPHONE_AMP RPI_BPLUS_GPIO_J8_25
+#define AMP_TAS5721_FAULT_I2C     RPI_BPLUS_GPIO_J8_26
+#define AMP_TAS5721_RESET         RPI_BPLUS_GPIO_J8_27
+#define AMP_TAS5721_PWR           RPI_BPLUS_GPIO_J8_28
+
+#define TAS5721_I2C_ADDR 0x36
+
+uint8_t G_TAS5721_detected;
+
