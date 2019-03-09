@@ -1,6 +1,6 @@
 include ../Makefile.inc
 
-INCLUDES= $(TOPINCLUDES) -I ../include  -I ../display -I ../tts
+INCLUDES= $(TOPINCLUDES) -I ../include  -I ../display -I ../tts -I ../audio
 
 LIBSEARCH= -L . 
 

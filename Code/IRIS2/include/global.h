@@ -218,6 +218,8 @@ uint8_t G_bt_connected;
 #define PERSISTENCE_CHECK_LOOP_DLY 20  // in seconds
 #define PERSISTENCE_DATA_SIG 6767
 
+#define VOLUME_MSG_DLY 50000
+
 uint8_t G_BASS_in_use;
 
 DWORD G_stream_chan, G_tts_chan; // BASS sound channels
@@ -240,6 +242,8 @@ uint8_t G_kill_rss_scroll;
 
 uint8_t G_vu_active;
 uint8_t G_kill_vu;
+
+uint8_t G_amp_detected;
 
 char G_current_stream_META[1024];
 
@@ -329,6 +333,10 @@ typedef struct _iris_config_t {
     uint8_t tts_pitch;
     uint8_t tts_volume;
     uint8_t matrix_brightness;
+    uint8_t HW_volume_L;
+    uint8_t HW_volume_R;
+    uint8_t HW_volume_S;
+    uint8_t HW_mastervol;
 } iris_config_t;
 
 iris_config_t G_config;

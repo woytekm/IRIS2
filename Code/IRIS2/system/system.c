@@ -1,5 +1,6 @@
 #include "global.h"
 #include "system.h"
+#include "audio.h"
 
 
 void PL_init(void)
@@ -48,8 +49,15 @@ void PL_init(void)
 
   G_display_mode_save = G_display_mode_upper_row;
 
-  G_amp_active = 0;  // should be turned off at startup
+  G_amp_detected = 0;
+
+  G_config.HW_volume_L = AMP_INIT_SATELLITE_GAIN;
+  G_config.HW_volume_R = AMP_INIT_SATELLITE_GAIN;
+  G_config.HW_volume_S = AMP_INIT_SUBWOOFER_GAIN;
+  G_config.HW_mastervol = AMP_INIT_MASTERVOL;
+  if(PL_init_amp()) G_amp_detected = 1;
   PL_set_amp(0);
+  G_amp_active = 0; // should be turned off at startup
 
   pipe(G_setup_key_input);
   pipe(G_TTS_thread_input);

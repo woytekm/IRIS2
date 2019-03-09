@@ -89,7 +89,7 @@ void PL_dispatch_keyboard_event(uint8_t keyboard_state)
     pthread_mutex_lock(&G_display_lock);
     my_spi_WEH001602_out_text(TOP_ROW,"                ");
     my_spi_WEH001602_out_text(TOP_ROW,volume_msg);
-    usleep(200000);
+    usleep(VOLUME_MSG_DLY);
     my_spi_WEH001602_out_text(TOP_ROW,"                ");
     pthread_mutex_unlock(&G_display_lock);
    }
@@ -111,7 +111,7 @@ void PL_dispatch_keyboard_event(uint8_t keyboard_state)
     pthread_mutex_lock(&G_display_lock);
     my_spi_WEH001602_out_text(TOP_ROW,"                ");
     my_spi_WEH001602_out_text(TOP_ROW,volume_msg);
-    usleep(200000);
+    usleep(VOLUME_MSG_DLY);
     my_spi_WEH001602_out_text(TOP_ROW,"                ");
     pthread_mutex_unlock(&G_display_lock);
    }

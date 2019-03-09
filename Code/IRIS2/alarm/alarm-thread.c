@@ -58,7 +58,7 @@ void PL_run_alarm(uint8_t alarm_index)
    sprintf(soundfile,"%s/%s", ALARM_SOUNDS_PATH, G_alarm_sounds[alarm_index].filename);
    
    if(!G_amp_active)
-    PL_init_amp(1);
+    PL_set_amp(1);
  
    if(!G_BASS_in_use)
     if(!BASS_Init(AUDIO_OUT_INTERNAL,44100,0,0,NULL)) // always play alarm sound on internal speaker
@@ -135,7 +135,7 @@ void PL_run_alarm(uint8_t alarm_index)
      {
       PL_debug("PL_run_alarm: Stopping BASS and turning off internal speaker");
       BASS_Free();
-      PL_set_internal_amp(0);
+      PL_set_amp(0);
      } 
     else
      PL_debug("PL_run_alarm: G_BASS_in_use=%d", G_BASS_in_use);
