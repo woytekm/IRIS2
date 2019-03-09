@@ -11,6 +11,7 @@
 #include "config.h"
 #include "alarm.h"
 #include "wifi_signal.h"
+#include "audio.h"
 
 
 main(int argc, char **argv)
@@ -19,16 +20,18 @@ main(int argc, char **argv)
   iris_persistence_data_t persistence_data;
   int pid;
  
-  PL_init();
-
   if(argc > 1)
    if(strstr(argv[1], "-d") != NULL)
     {
      G_debug_info_active = 1;
      G_logfile_handle = fopen(DEBUG_FILE,"w");
     }
+   else
+    G_debug_info_active = 0;
  
   PL_debug("main: Iris version %d.%d. Compiled on: %s. Starting...", IRIS_VER_MAJOR, IRIS_VER_MINOR, IRIS_COMPILE_TIME);
+
+  PL_init();
  
   pid = fork(); 
   if (pid < 0)
@@ -62,6 +65,7 @@ main(int argc, char **argv)
   G_iris_tasks[TASK_WIFI_INDICATOR] = PL_start_task(TASK_WIFI_INDICATOR, PL_wifi_signal_thread, NULL, SCHED_BATCH, 0);
   G_iris_tasks[TASK_BT_INDICATOR] = PL_start_task(TASK_BT_INDICATOR, PL_bt_indicator, NULL, SCHED_BATCH, 0);
   G_iris_tasks[TASK_MATRIX] = PL_start_task(TASK_MATRIX, PL_matrix_analyser_thread, NULL, SCHED_RR, 96);
+  G_iris_tasks[TASK_AMP_HW_CTRL] = PL_start_task(TASK_AMP_HW_CTRL, PL_HW_amp_control_thread, NULL, SCHED_RR, 97);
 
   if(G_config.www_access)
    G_iris_tasks[TASK_WEBSRV] = PL_start_task(TASK_WEBSRV, PL_websrv_thread, NULL, SCHED_BATCH, 0);

@@ -6,10 +6,10 @@ INCLUDES = -I wifi -I alarm -I config -I system -I player -I include -I clock -I
 MAIN_EXE = Iris
 MAIN_EXE_STATIC = Iris-static
 PLLIBS = libplclock.a libWEH001602.a librss-reader.a libplayer.a libkeyboard.a libconfig.a libsetup.a librss-tts.a libsystem.a libalarm.a libwifi.a libmatrix.a libaudio.a
-DIRS = clock display player config rss keyboard setup tts matrix wifi alarm system IRIS2 audio
+DIRS = include clock display player config rss keyboard setup tts matrix wifi alarm system IRIS2 audio
 
 
-all: $(PLLIBS) $(MAIN_EXE)
+all: version.h $(PLLIBS) $(MAIN_EXE)
 
 all_static: $(PLLIBS) $(MAIN_EXE_STATIC)
 
@@ -18,6 +18,9 @@ $(MAIN_EXE): $(PLLIBS)
 
 $(MAIN_EXE_STATIC): $(PLLIBS)
 	cd IRIS2; $(MAKE) $(MAIN_EXE_STATIC)
+
+version.h:
+	cd include; $(MAKE)
 
 libmatrix.a:
 	cd matrix; $(MAKE)

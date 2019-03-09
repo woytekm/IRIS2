@@ -108,7 +108,19 @@ void init_setup_menu(void)
    next_item->next = new_menu_item(next_item,"[Tell time]", (void*)&G_config.tell_time_when_on, VAR_TYPE_GET_UINT8, 0, 2);
    next_item = next_item->next;
 
-   next_item->next = new_menu_item(next_item,"[Matrix dim]", (void*)&G_config.matrix_brightness, VAR_TYPE_GET_UINT8, 1, 9);
+   next_item->next = new_menu_item(next_item,"[HW vol]", (void*)&G_config.HW_volume_L, VAR_TYPE_GET_UINT8, 0, 128);
+   next_item = next_item->next;
+
+   next_item->next = new_menu_item(next_item,"[HW vol Sub]", (void*)&G_config.HW_volume_S, VAR_TYPE_GET_UINT8, 0, 128);
+   next_item = next_item->next;
+
+   next_item->next = new_menu_item(next_item,"[HW master vol]", (void*)&G_config.HW_mastervol, VAR_TYPE_GET_UINT8, 0, 128);
+   next_item = next_item->next;
+
+   next_item->next = new_menu_item(next_item,"[Tell time]", (void*)&G_config.tell_time_when_on, VAR_TYPE_GET_UINT8, 0, 2);
+   next_item = next_item->next;
+
+   next_item->next = new_menu_item(next_item,"[Matrix dim]", (void*)&G_config.matrix_brightness, VAR_TYPE_GET_UINT8, 1, 8);
    next_item = next_item->next;
 
    if(!G_config.basic_menu)
@@ -491,7 +503,7 @@ int8_t PL_get_setup_menu_item(setup_menu_item_t *item)
       else if( ((key_pressed == KEY_VOL_DOWN)||(key_pressed == KEY_VOL_DOWN_LONG)) && (*(uint8_t *)item->variable == item->var_min))
        (*(uint8_t *)item->variable) = item->var_max;
 
-      sprintf(vartext,">%02d",*(uint8_t *)item->variable);
+      sprintf(vartext,">%02d ",*(uint8_t *)item->variable);
       my_spi_WEH001602_out_text(BOTTOM_ROW,vartext);
      }
 
@@ -516,7 +528,7 @@ int8_t PL_get_setup_menu_item(setup_menu_item_t *item)
       else if( ((key_pressed == KEY_VOL_DOWN)||(key_pressed == KEY_VOL_DOWN_LONG)) && (*(uint32_t *)item->variable == item->var_min))
        (*(uint32_t *)item->variable) = item->var_max;
 
-      sprintf(vartext,">%04d",*(uint32_t *)item->variable);
+      sprintf(vartext,">%04d  ",*(uint32_t *)item->variable);
       my_spi_WEH001602_out_text(BOTTOM_ROW,vartext);
      }
 

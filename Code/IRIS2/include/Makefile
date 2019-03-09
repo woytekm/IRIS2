@@ -4,4 +4,4 @@ version.h:
 clean:
 	rm -f version.h
 
-all: version.h
+all: version.h global.h

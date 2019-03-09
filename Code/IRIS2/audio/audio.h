@@ -9,5 +9,6 @@ uint8_t PL_HW_init_amp();
 uint8_t PL_HW_set_amp_HW_volume(uint8_t HW_volume_L,uint8_t HW_volume_R,uint8_t HW_volume_M, uint8_t HW_mastervol);
 uint8_t PL_HW_enable_amp();
 uint8_t PL_HW_shutdown_amp();
+void    PL_HW_amp_control_thread();
 
 

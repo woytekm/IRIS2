@@ -16,8 +16,6 @@ void PL_init(void)
 
   G_iris_task_count = 1;
 
-  G_debug_info_active = 0;
-
   G_alarms = NULL;
 
   G_global_mode = GLOBAL_MODE_NORMAL;

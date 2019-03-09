@@ -270,6 +270,7 @@ char G_current_stream_META[1024];
 #define TASK_EXT_CMDS           17
 #define TASK_WEBSRV             18
 #define TASK_MATRIX             19
+#define TASK_AMP_HW_CTRL        20
 
 typedef struct _iris_task_info_t {
   pthread_t task_id;

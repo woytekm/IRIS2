@@ -344,6 +344,18 @@ uint8_t PL_build_config(unsigned char *config_buffer)
   sprintf(&config_buffer[config_buffer_pos],"%s",config_line);
   config_buffer_pos += strlen(config_line);
 
+  sprintf(config_line,"HW_volume_satellites=%d\n",G_config.HW_volume_L);
+  sprintf(&config_buffer[config_buffer_pos],"%s",config_line);
+  config_buffer_pos += strlen(config_line);
+
+  sprintf(config_line,"HW_volume_subwoofer=%d\n",G_config.HW_volume_S);
+  sprintf(&config_buffer[config_buffer_pos],"%s",config_line);
+  config_buffer_pos += strlen(config_line);
+
+  sprintf(config_line,"HW_master_volume=%d\n",G_config.HW_mastervol);
+  sprintf(&config_buffer[config_buffer_pos],"%s",config_line);
+  config_buffer_pos += strlen(config_line);
+
   if(strlen(G_config.bt_speaker) >= 10)
    {
     sprintf(config_line,"bt_speaker=%s\n",G_config.bt_speaker);
@@ -698,6 +710,21 @@ void PL_parse_config_av(unsigned char *avpair)
       case CONFIG_ATTR_MATRIX_BRIGHTNESS:
        G_config.matrix_brightness = atoi(value);
        PL_debug("PL_parse_config_av: parsed matrix brightness value: %d",G_config.matrix_brightness);
+       break;
+
+      case CONFIG_ATTR_HW_VOL_SATELLITE:
+       G_config.HW_volume_L  = G_config.HW_volume_R = atoi(value);
+       PL_debug("PL_parse_config_av: parsed hardware volume for satellite speakers: %d",G_config.HW_volume_L);
+       break;
+
+      case CONFIG_ATTR_HW_VOL_SUBWOOFER:
+       G_config.HW_volume_S = atoi(value);
+       PL_debug("PL_parse_config_av: parsed hardware volume for subwoofer: %d",G_config.HW_volume_S);
+       break;
+
+      case CONFIG_ATTR_HW_VOL_MASTER:
+       G_config.HW_mastervol = atoi(value);
+       PL_debug("PL_parse_config_av: parsed hardware master volume: %d",G_config.HW_mastervol);
        break;
 
       case CONFIG_ATTR_TTS_SPEED:

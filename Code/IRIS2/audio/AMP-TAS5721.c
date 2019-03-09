@@ -45,7 +45,7 @@ uint8_t PL_HW_init_amp()
 
   if(i2c_readchar == TAS5721_I2C_ID)
    {
-     PL_debug("PL_HW_init_amp(TAS5721): detected TAS5721 at 0x%x\n",TAS5721_I2C_ADDR);
+     PL_debug("PL_HW_init_amp(TAS5721): detected TAS5721 at 0x%x",TAS5721_I2C_ADDR);
      G_TAS5721_detected = 1;
      G_amp_detected = 1;
    } 
@@ -58,19 +58,19 @@ uint8_t PL_HW_init_amp()
   // TAS5721 is detected - let's init it and set it up for 2.1 mode
 
   i2c_result = I2C_WriteByteRegister(TAS5721_I2C_ADDR,TAS5721_I2C_REG_OSCTRIM,0x00);  // oscillator factory trim
-  PL_debug("PL_HW_init_amp(TAS5721): 0x%x, 0x%x, I2C write result: %d\n",TAS5721_I2C_REG_OSCTRIM,0x00,i2c_result);
+  PL_debug("PL_HW_init_amp(TAS5721): 0x%x, 0x%x, I2C write result: %d",TAS5721_I2C_REG_OSCTRIM,0x00,i2c_result);
   i2c_result = I2C_WriteByteRegister(TAS5721_I2C_ADDR,TAS5721_I2C_REG_SERDAT,0x03);   // I2S word lenght = 16bit
-  PL_debug("PL_HW_init_amp(TAS5721): 0x%x, 0x%x, I2C write result: %d\n",TAS5721_I2C_REG_SERDAT,0x03,i2c_result);
+  PL_debug("PL_HW_init_amp(TAS5721): 0x%x, 0x%x, I2C write result: %d",TAS5721_I2C_REG_SERDAT,0x03,i2c_result);
   i2c_result = I2C_WriteByteArray(TAS5721_I2C_ADDR,TAS5721_I2C_REG_CH4SRC,(char *)&tas5721_subchannel_mixer_21_setup,4);  // set sub channel mixer to 2.1 mode
-  PL_debug("PL_HW_init_amp(TAS5721): 0x%x, 0x%x, I2C write result: %d\n",TAS5721_I2C_REG_CH4SRC,tas5721_subchannel_mixer_21_setup[0],i2c_result);
+  PL_debug("PL_HW_init_amp(TAS5721): 0x%x, 0x%x, I2C write result: %d",TAS5721_I2C_REG_CH4SRC,tas5721_subchannel_mixer_21_setup[0],i2c_result);
   i2c_result = I2C_WriteByteRegister(TAS5721_I2C_ADDR,TAS5721_I2C_REG_SOFTMUTE,0x07); // mute all channels
-  PL_debug("PL_HW_init_amp(TAS5721): 0x%x, 0x%x, I2C write result: %d\n",TAS5721_I2C_REG_SOFTMUTE,0x07,i2c_result);
+  PL_debug("PL_HW_init_amp(TAS5721): 0x%x, 0x%x, I2C write result: %d",TAS5721_I2C_REG_SOFTMUTE,0x07,i2c_result);
   i2c_result = I2C_WriteByteRegister(TAS5721_I2C_ADDR,TAS5721_I2C_REG_CH1VOL,AMP_INIT_SATELLITE_GAIN);    // set gain for subsequent channels
-  PL_debug("PL_HW_init_amp(TAS5721): 0x%x, 0x%x, I2C write result: %d\n",TAS5721_I2C_REG_CH1VOL,AMP_INIT_SATELLITE_GAIN,i2c_result);
+  PL_debug("PL_HW_init_amp(TAS5721): 0x%x, 0x%x, I2C write result: %d",TAS5721_I2C_REG_CH1VOL,AMP_INIT_SATELLITE_GAIN,i2c_result);
   i2c_result = I2C_WriteByteRegister(TAS5721_I2C_ADDR,TAS5721_I2C_REG_CH2VOL,AMP_INIT_SUBWOOFER_GAIN);
-  PL_debug("PL_HW_init_amp(TAS5721): 0x%x, 0x%x, I2C write result: %d\n",TAS5721_I2C_REG_CH2VOL,AMP_INIT_SUBWOOFER_GAIN,i2c_result);
+  PL_debug("PL_HW_init_amp(TAS5721): 0x%x, 0x%x, I2C write result: %d",TAS5721_I2C_REG_CH2VOL,AMP_INIT_SUBWOOFER_GAIN,i2c_result);
   i2c_result = I2C_WriteByteRegister(TAS5721_I2C_ADDR,TAS5721_I2C_REG_MASTERVOL,AMP_INIT_MASTERVOL);
-  PL_debug("PL_HW_init_amp(TAS5721): 0x%x, 0x%x, I2C write result: %d\n",TAS5721_I2C_REG_MASTERVOL,AMP_INIT_MASTERVOL,i2c_result);
+  PL_debug("PL_HW_init_amp(TAS5721): 0x%x, 0x%x, I2C write result: %d",TAS5721_I2C_REG_MASTERVOL,AMP_INIT_MASTERVOL,i2c_result);
 
   bcm2835_i2c_end();
 
@@ -87,11 +87,11 @@ uint8_t PL_HW_set_amp_HW_volume(uint8_t HW_volume_L,uint8_t HW_volume_R,uint8_t 
   bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_2500);
 
   i2c_result = I2C_WriteByteRegister(TAS5721_I2C_ADDR,TAS5721_I2C_REG_CH1VOL,HW_volume_L);    // set gain for subsequent channels
-  PL_debug("PL_HW_set_volume(TAS5721): 0x%x, 0x%x, I2C write result: %d\n",TAS5721_I2C_REG_CH1VOL,HW_volume_L,i2c_result);
+  PL_debug("PL_HW_set_volume(TAS5721): 0x%x, 0x%x, I2C write result: %d",TAS5721_I2C_REG_CH1VOL,HW_volume_L,i2c_result);
   i2c_result = I2C_WriteByteRegister(TAS5721_I2C_ADDR,TAS5721_I2C_REG_CH2VOL,HW_volume_S);
-  PL_debug("PL_HW_set_volume(TAS5721): 0x%x, 0x%x, I2C write result: %d\n",TAS5721_I2C_REG_CH2VOL,HW_volume_S,i2c_result);
+  PL_debug("PL_HW_set_volume(TAS5721): 0x%x, 0x%x, I2C write result: %d",TAS5721_I2C_REG_CH2VOL,HW_volume_S,i2c_result);
   i2c_result = I2C_WriteByteRegister(TAS5721_I2C_ADDR,TAS5721_I2C_REG_MASTERVOL,HW_mastervol);
-  PL_debug("PL_HW_set_volume(TAS5721): 0x%x, 0x%x, I2C write result: %d\n",TAS5721_I2C_REG_MASTERVOL,HW_mastervol,i2c_result);
+  PL_debug("PL_HW_set_volume(TAS5721): 0x%x, 0x%x, I2C write result: %d",TAS5721_I2C_REG_MASTERVOL,HW_mastervol,i2c_result);
 
   bcm2835_i2c_end();
 
@@ -107,9 +107,9 @@ uint8_t PL_HW_enable_amp()
   bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_2500);
 
   i2c_result = I2C_WriteByteRegister(TAS5721_I2C_ADDR,TAS5721_I2C_REG_SYSCTRL2,0x84);
-  PL_debug("PL_HW_enable_amp(TAS5721): 0x%x, 0x%x, I2C write result: %d\n",TAS5721_I2C_REG_SYSCTRL2,0x84,i2c_result);
+  PL_debug("PL_HW_enable_amp(TAS5721): 0x%x, 0x%x, I2C write result: %d",TAS5721_I2C_REG_SYSCTRL2,0x84,i2c_result);
   i2c_result = I2C_WriteByteRegister(TAS5721_I2C_ADDR,TAS5721_I2C_REG_SOFTMUTE,0x00);
-  PL_debug("PL_HW_enable_amp(TAS5721): 0x%x, 0x%x, I2C write result: %d\n",TAS5721_I2C_REG_SOFTMUTE,0x00,i2c_result);
+  PL_debug("PL_HW_enable_amp(TAS5721): 0x%x, 0x%x, I2C write result: %d",TAS5721_I2C_REG_SOFTMUTE,0x00,i2c_result);
 
   PL_HW_set_amp_HW_volume(G_config.HW_volume_L,G_config.HW_volume_R,G_config.HW_volume_S,G_config.HW_mastervol);
 
@@ -126,9 +126,9 @@ uint8_t PL_HW_shutdown_amp()
   bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_2500);
 
   i2c_result = I2C_WriteByteRegister(TAS5721_I2C_ADDR,TAS5721_I2C_REG_SOFTMUTE,0x07);
-  PL_debug("PL_HW_shutdown_amp(TAS5721): 0x%x, 0x%x, I2C write result: %d\n",TAS5721_I2C_REG_SOFTMUTE,0x07,i2c_result);
+  PL_debug("PL_HW_shutdown_amp(TAS5721): 0x%x, 0x%x, I2C write result: %d",TAS5721_I2C_REG_SOFTMUTE,0x07,i2c_result);
   i2c_result = I2C_WriteByteRegister(TAS5721_I2C_ADDR,TAS5721_I2C_REG_SYSCTRL2,0x04);
-  PL_debug("PL_HW_shutdown_amp(TAS5721): 0x%x, 0x%x, I2C write result: %d\n",TAS5721_I2C_REG_SYSCTRL2,0x04,i2c_result);
+  PL_debug("PL_HW_shutdown_amp(TAS5721): 0x%x, 0x%x, I2C write result: %d",TAS5721_I2C_REG_SYSCTRL2,0x04,i2c_result);
 
   bcm2835_i2c_end();
   return 1;
