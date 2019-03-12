@@ -1,12 +1,12 @@
 CC = gcc
 MAKE = make
 LIBS = -lpthread -lplclock -lrss-reader -lplayer -lkeyboard -lconfig -lWEH001602 -lsetup -lrss-tts -lsystem -lalarm -lwifi -lbcm2835  -lxml2 -lcurl -lbass -lbassflac -lbass_aac -lcrypt -lmicrohttpd -lmatrix -laudio
-LIBSEARCH = -L ./clock -L ./display -L ./rss -L ./player -L ./keyboard -L ./config -L ./setup -L ./tts -L ./system -L ./alarm -L ./wifi -L ./matrix -L ./audio
-INCLUDES = -I wifi -I alarm -I config -I system -I player -I include -I clock -I display -I rss -I keyboard -I setup -I tts -I audio -I /usr/include/libxml2
+LIBSEARCH = -L ./clock -L ./display -L ./rss -L ./player -L ./keyboard -L ./config -L ./setup -L ./tts -L ./system -L ./alarm -L ./wifi -L ./matrix -L ./audio -L ./bluetooth
+INCLUDES = -I wifi -I alarm -I config -I system -I player -I include -I clock -I display -I rss -I keyboard -I setup -I tts -I audio -I bluetooth -I /usr/include/libxml2
 MAIN_EXE = Iris
 MAIN_EXE_STATIC = Iris-static
-PLLIBS = libplclock.a libWEH001602.a librss-reader.a libplayer.a libkeyboard.a libconfig.a libsetup.a librss-tts.a libsystem.a libalarm.a libwifi.a libmatrix.a libaudio.a
-DIRS = include clock display player config rss keyboard setup tts matrix wifi alarm system IRIS2 audio
+PLLIBS = libplclock.a libWEH001602.a librss-reader.a libplayer.a libkeyboard.a libconfig.a libsetup.a librss-tts.a libsystem.a libalarm.a libwifi.a libmatrix.a libaudio.a libbluetooth.a
+DIRS = include clock display player config rss keyboard setup tts matrix wifi alarm system IRIS2 audio bluetooth
 
 
 all: version.h $(PLLIBS) $(MAIN_EXE)
@@ -60,6 +60,9 @@ libalarm.a:
 
 libwifi.a:
 	cd wifi; $(MAKE)
+
+libbluetooth.a:
+	cd bluetooth; $(MAKE)
 
 install: $(MAIN_EXE)
 	mv IRIS2/$(MAIN_EXE) /usr/local/bin

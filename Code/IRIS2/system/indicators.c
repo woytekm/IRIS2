@@ -11,8 +11,8 @@ void PL_bt_indicator(void)
 
    while(1)
     {
-
-     if( (G_global_mode == GLOBAL_MODE_NORMAL) && G_config.bt_spk)
+     
+     if(G_global_mode == GLOBAL_MODE_NORMAL)
       {
         system("/usr/sbin/iris-check-bt-speaker.sh");    
 
@@ -29,10 +29,19 @@ void PL_bt_indicator(void)
           G_bt_connected = 1;
          }
 
+        if(!G_bt_source_connected)
+         {
+          my_spi_WEH001602_out_text_at_col(BOTTOM_ROW, 1, " \0");
+         }
+        else
+         {
+          my_spi_WEH001602_out_text_at_col(BOTTOM_ROW, 1, "\0\0");
+         }
+
        pthread_mutex_unlock(&G_display_lock);
       }
 
-     sleep(3);
+     sleep(5);
 
     }
 

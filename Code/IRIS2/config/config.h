@@ -37,6 +37,7 @@ void PL_persistence_thread(void);
 #define CONFIG_ATTR_HW_VOL_SATELLITE 2044 
 #define CONFIG_ATTR_HW_VOL_SUBWOOFER 2065
 #define CONFIG_ATTR_HW_VOL_MASTER 1729
+#define CONFIG_ATTR_BT_PAIR_WITH 1276
 
 // end
 

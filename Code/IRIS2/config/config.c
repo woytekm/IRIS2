@@ -356,6 +356,14 @@ uint8_t PL_build_config(unsigned char *config_buffer)
   sprintf(&config_buffer[config_buffer_pos],"%s",config_line);
   config_buffer_pos += strlen(config_line);
 
+
+  if(strlen(G_config.bt_pair_with >= 3))
+   {
+    sprintf(config_line,"bt_pair_with=%s\n",G_config.bt_pair_with);
+    sprintf(&config_buffer[config_buffer_pos],"%s",config_line);
+    config_buffer_pos += strlen(config_line);
+   }
+
   if(strlen(G_config.bt_speaker) >= 10)
    {
     sprintf(config_line,"bt_speaker=%s\n",G_config.bt_speaker);
@@ -620,6 +628,11 @@ void PL_parse_config_av(unsigned char *avpair)
        if((tmp_val == 0) || (tmp_val == 1))
         G_config.bt_sink = tmp_val;
        PL_debug("PL_parse_config_av: parsed bluetooth sink flag: %d",G_config.bt_sink);
+       break;
+
+      case CONFIG_ATTR_BT_PAIR_WITH:
+       strncpy(G_config.bt_pair_with,value,30);
+       PL_debug("PL_parse_config_av: parsed bluetooth source address: [%s]",G_config.bt_pair_with);
        break;
 
       case CONFIG_ATTR_BT_SPEAKER:

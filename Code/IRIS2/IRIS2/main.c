@@ -12,6 +12,7 @@
 #include "alarm.h"
 #include "wifi_signal.h"
 #include "audio.h"
+#include "bluetooth.h"
 
 
 main(int argc, char **argv)
@@ -66,6 +67,8 @@ main(int argc, char **argv)
   G_iris_tasks[TASK_BT_INDICATOR] = PL_start_task(TASK_BT_INDICATOR, PL_bt_indicator, NULL, SCHED_BATCH, 0);
   G_iris_tasks[TASK_MATRIX] = PL_start_task(TASK_MATRIX, PL_matrix_analyser_thread, NULL, SCHED_RR, 96);
   G_iris_tasks[TASK_AMP_HW_CTRL] = PL_start_task(TASK_AMP_HW_CTRL, PL_HW_amp_control_thread, NULL, SCHED_RR, 97);
+  G_iris_tasks[TASK_BTCTRL] = PL_start_task(TASK_BTCTRL, PL_bluetoothctl_proxy_thread, NULL, SCHED_RR, 98);
+  G_iris_tasks[TASK_BTPLAYERCTRL] = PL_start_task(TASK_BTPLAYERCTRL, PL_bluetoothplayer_proxy_thread, NULL, SCHED_RR, 99);
 
   if(G_config.www_access)
    G_iris_tasks[TASK_WEBSRV] = PL_start_task(TASK_WEBSRV, PL_websrv_thread, NULL, SCHED_BATCH, 0);

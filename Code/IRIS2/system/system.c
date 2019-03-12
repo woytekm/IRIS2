@@ -41,6 +41,8 @@ void PL_init(void)
   G_vu_active = 0;
   G_kill_vu = 0;
 
+  G_bt_pair_now = 0;
+
   G_config.sleep_timer_time = 40; // 40 minutes
 
   G_config.volume_level = G_prev_volume_level = 0.5;
@@ -56,6 +58,8 @@ void PL_init(void)
   if(PL_init_amp()) G_amp_detected = 1;
   PL_set_amp(0);
   G_amp_active = 0; // should be turned off at startup
+
+  G_config.bt_pair_with[0] = 0x0;
 
   pipe(G_setup_key_input);
   pipe(G_TTS_thread_input);

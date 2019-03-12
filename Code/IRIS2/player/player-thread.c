@@ -54,6 +54,7 @@ void PL_player_display_thread(void)
    DWORD channel_level;
    uint16_t left_level;
    uint16_t right_level;
+   char bt_meta[512];
 
    PL_debug("PL_player_display_thread: starting");
 
@@ -75,7 +76,8 @@ void PL_player_display_thread(void)
 
      if((G_config.bt_sink) && (G_player_mode == PLAYER_STOP))
        {
-        my_spi_WEH001602_scroll_meta_once("BT Sink active", TOP_ROW);
+        sprintf(bt_meta,"BT: %s - %s (%s)",G_bt_found_artist,G_bt_found_title,G_bt_found_album);
+        my_spi_WEH001602_scroll_meta_once(bt_meta, TOP_ROW);
         sleep(1);
        }
      if((G_display_mode_upper_row ==  DISPLAY_MODE_PLAYER_META) && (G_player_mode == PLAYER_STREAM))

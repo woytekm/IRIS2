@@ -158,6 +158,12 @@ void init_setup_menu(void)
      next_item->next = new_menu_item(next_item,"[BT speaker]", (void*)&G_config.bt_spk, VAR_TYPE_GET_BOOL, 0, 0);
      next_item = next_item->next;
 
+     next_item->next = new_menu_item(next_item,"[BT pair with]", (void*)&G_config.bt_pair_with, VAR_TYPE_GET_STRING, 0, 0);
+     next_item = next_item->next;
+
+     next_item->next = new_menu_item(next_item,"[BT pair now]", (void*)&G_bt_pair_now, VAR_TYPE_GET_BOOL, 0, 0);
+     next_item = next_item->next;
+
      if(!G_config.bt_spk)
       {
         next_item->next = new_menu_item(next_item,"[BT sink]", (void*)&G_config.bt_sink, VAR_TYPE_GET_BOOL, 0, 0);
@@ -707,6 +713,11 @@ int8_t PL_get_setup_menu_item(setup_menu_item_t *item)
       my_spi_WEH001602_out_cmd(0b00001111); // turn cursor+blinking on
       my_spi_WEH001602_move_cursor_at_col(BOTTOM_ROW,1+cursor_pos);
      }
+
+    char *end = edit_string  + strlen(edit_string) - 1;
+    while(end > edit_string  && isspace((unsigned char)*end)) end--;
+    end[1] = '\0';
+
    }
 
   my_spi_WEH001602_out_cmd(0b00001100);

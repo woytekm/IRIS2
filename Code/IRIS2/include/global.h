@@ -199,7 +199,14 @@ uint8_t G_TTS_state;
 uint8_t G_tts_channel_status;
 uint8_t G_stream_channel_status;
 
+uint8_t G_bt_source_connected;
 uint8_t G_bt_connected;
+
+
+char G_bt_found_title[128];
+char G_bt_found_album[128];
+char G_bt_found_artist[128];
+
 
 #define BASS_IN_USE_BY_TTS    1
 #define BASS_IN_USE_BY_STREAM 2
@@ -271,6 +278,10 @@ char G_current_stream_META[1024];
 #define TASK_WEBSRV             18
 #define TASK_MATRIX             19
 #define TASK_AMP_HW_CTRL        20
+#define TASK_BTCTRL             21
+#define TASK_BTPLAYERCTRL        22
+
+
 
 typedef struct _iris_task_info_t {
   pthread_t task_id;
@@ -326,6 +337,7 @@ typedef struct _iris_config_t {
     unsigned char timezone[255];   
     uint8_t bt_spk;
     uint8_t bt_sink;
+    unsigned char bt_pair_with[255];
     unsigned char bt_source[20];
     unsigned char bt_speaker[20];
     uint8_t debug;
@@ -368,6 +380,8 @@ uint8_t G_matrix_brightness;
 uint8_t G_clear_matrix;
 
 uint8_t G_matrix_mode;
+
+uint8_t G_bt_pair_now;
 
 #define MATRIX_MODE_CLOCK 1
 #define MATRIX_MODE_ANALYSER 2
