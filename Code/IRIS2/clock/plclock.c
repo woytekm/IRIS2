@@ -67,9 +67,18 @@ void PL_clock_thread(void)
          m_clear();
          m_setcursor(10,15);
          m_writechar(timestr[0],1,18,0);
+
+         if(timestr[0] == '1')
+           m_setcursor(18,15);
+         else
+           m_setcursor(20,15);
+
          m_writechar(timestr[1],1,18,0);
          m_writechar(timestr[2],1,18,0);
-         m_setcursor(34,15);
+         if(timestr[0] == '1')
+           m_setcursor(32,15);
+         else
+           m_setcursor(34,15);
          m_writechar(timestr[3],1,18,0);
          m_writechar(timestr[4],1,18,0);
          m_display();
@@ -100,6 +109,10 @@ void PL_clock_thread(void)
          sprintf(timestr,"%02d %02d",G_tm->tm_hour, G_tm->tm_min);
         else
          sprintf(timestr,"     "); // crude screen saver - this should be substituted with large graphic clock moving across the screen when unit is idle
+
+        if(G_matrix_mode == MATRIX_MODE_CLOCK)  // blank upper display if matrix is displaying clock
+         sprintf(timestr,"     ");
+
        }
 	   
       if(G_display_mode_lower_row == DISPLAY_MODE_CLOCK_DATE)

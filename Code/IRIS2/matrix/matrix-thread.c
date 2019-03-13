@@ -116,7 +116,7 @@ void PL_matrix_analyser_thread(void)
   m_set_brightness(G_config.matrix_brightness);
 
   G_matrix_analyser_mode = MATRIX_ANALYSER_MODE_MONO_HOLD;
-  G_matrix_mode = MATRIX_MODE_ANALYSER;
+  G_matrix_mode = MATRIX_MODE_CLOCK;
   G_matrix_analyser_color_scheme = MATRIX_ANALYSER_COLOR_01;
   G_clear_matrix = 0;
 
@@ -130,10 +130,13 @@ void PL_matrix_analyser_thread(void)
        bzero(&fft,sizeof(fft));
        cleared = 1;
        G_clear_matrix = 0;
+       G_matrix_mode = MATRIX_MODE_CLOCK;
       }
 
-     if((G_matrix_mode == MATRIX_MODE_ANALYSER) && ((G_player_mode == PLAYER_STREAM) || (G_config.bt_sink)) )
+     if( (G_player_mode == PLAYER_STREAM) || (G_config.bt_sink) )
       {
+
+       G_matrix_mode = MATRIX_MODE_ANALYSER;
 
        if(G_matrix_analyser_mode == MATRIX_ANALYSER_MODE_MONO_HOLD)
         BASS_ChannelGetData(G_stream_chan, fft, BASS_DATA_FFT512);

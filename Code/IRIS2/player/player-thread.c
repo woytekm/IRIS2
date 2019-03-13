@@ -214,12 +214,12 @@ void PL_player_thread(void)
         if(!bt_sink_inited)
          {
           PL_debug("PL_player_thread: bluetooth sink init.");
-          output = AUDIO_OUT_INTERNAL;
+          output = 2;
           BASS_err = BASS_ErrorGetCode();
           BASS_Init(output,44100,0,0,NULL);
           PL_debug("PL_player_thread: bluetooth sink init: output init: %d",BASS_err);
           BASS_err = BASS_ErrorGetCode();
-          BASS_RecordInit(0); // default record device should be Bluealsa driven BT sink. Bluetooth connect, pairing, and other stuff will be in separate thread.
+          BASS_RecordInit(0);       // default record device should be Bluealsa driven BT sink. Bluetooth connect, pairing, and other stuff will be in separate thread.
           PL_debug("PL_player_thread: bluetooth sink init: input init: %d",BASS_err);
           BASS_RecordSetInput(0,BASS_INPUT_ON,1);
           rchan=BASS_RecordStart(44100,2,0,&PL_RecordProc,0);
@@ -230,6 +230,7 @@ void PL_player_thread(void)
           BASS_ChannelSetAttribute(G_stream_chan,BASS_ATTRIB_VOL,G_config.volume_level);
           BASS_err = BASS_ErrorGetCode();
           BASS_ChannelPlay(G_stream_chan,0);
+          PL_set_amp(1);
           PL_debug("PL_player_thread: bluetooth sink init: output start: %d",BASS_err);
           bt_sink_inited = 1;
          }
@@ -241,6 +242,7 @@ void PL_player_thread(void)
 
         usleep(90*1000);
        }
+
       if(bt_sink_inited)
        {
         PL_debug("PL_player_thread: bluetooth sink stop.");
@@ -248,6 +250,7 @@ void PL_player_thread(void)
         BASS_RecordFree();
         BASS_ChannelStop(G_stream_chan); 
         BASS_StreamFree(G_stream_chan);
+        PL_set_amp(0);
         BASS_Free();
         bt_sink_inited = 0;
         G_config.volume_level = 0.40;        // set volume back to some sane level for internet streams
