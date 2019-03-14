@@ -74,21 +74,24 @@ uint8_t bt_playerproxy_get_info(int sockfd)
       token = strtok(found_title,":");
       token = strtok(NULL,":");
       if(token != NULL)
-       strcpy(G_bt_found_title,token);
+       if(strstr(token,"bluez") == NULL)   // filter out garbage from player command line
+        strcpy(G_bt_found_title,token);
      }
     if(strlen(found_artist)>0)
      {
       token = strtok(found_artist,":");
       token = strtok(NULL,":");
       if(token != NULL)
-       strcpy(G_bt_found_artist,token);
+       if(strstr(token,"bluez") == NULL)  // filter out garbage from player command line
+         strcpy(G_bt_found_artist,token);
      }
     if(strlen(found_album)>0)
      {
       token = strtok(found_album,":");
       token = strtok(NULL,":");
       if(token != NULL)
-       strcpy(G_bt_found_album,token);
+       if(strstr(token,"bluez") == NULL)  // filter out garbage from player command line
+        strcpy(G_bt_found_album,token);
      }
     }
 

@@ -37,9 +37,9 @@ uint8_t PL_HW_init_amp()
   bcm2835_gpio_write(AMP_TAS5721_RESET, HIGH);        // Toggle reset (2)
   usleep(10000);
 
-  bcm2835_i2c_begin();
-  bcm2835_i2c_set_baudrate(TAS5721_I2C_BAUDRATE);
-  bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_2500);
+  //bcm2835_i2c_begin();
+  //bcm2835_i2c_set_baudrate(TAS5721_I2C_BAUDRATE);
+  //bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_2500);
 
   i2c_readchar = I2C_ReadByteRegister(TAS5721_I2C_ADDR,TAS5721_I2C_REG_CLKCTRL);  // we should get TAS5721_I2C_ID here
 
@@ -72,7 +72,7 @@ uint8_t PL_HW_init_amp()
   i2c_result = I2C_WriteByteRegister(TAS5721_I2C_ADDR,TAS5721_I2C_REG_MASTERVOL,AMP_INIT_MASTERVOL);
   PL_debug("PL_HW_init_amp(TAS5721): 0x%x, 0x%x, I2C write result: %d",TAS5721_I2C_REG_MASTERVOL,AMP_INIT_MASTERVOL,i2c_result);
 
-  bcm2835_i2c_end();
+  //bcm2835_i2c_end();
 
   return 1;
   
@@ -82,9 +82,9 @@ uint8_t PL_HW_set_amp_HW_volume(uint8_t HW_volume_L,uint8_t HW_volume_R,uint8_t 
  {
   uint8_t i2c_result;
 
-  bcm2835_i2c_begin();
-  bcm2835_i2c_set_baudrate(TAS5721_I2C_BAUDRATE);
-  bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_2500);
+  //bcm2835_i2c_begin();
+  //bcm2835_i2c_set_baudrate(TAS5721_I2C_BAUDRATE);
+  //bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_2500);
 
   i2c_result = I2C_WriteByteRegister(TAS5721_I2C_ADDR,TAS5721_I2C_REG_CH1VOL,HW_volume_L);    // set gain for subsequent channels
   PL_debug("PL_HW_set_volume(TAS5721): 0x%x, 0x%x, I2C write result: %d",TAS5721_I2C_REG_CH1VOL,HW_volume_L,i2c_result);
@@ -93,7 +93,7 @@ uint8_t PL_HW_set_amp_HW_volume(uint8_t HW_volume_L,uint8_t HW_volume_R,uint8_t 
   i2c_result = I2C_WriteByteRegister(TAS5721_I2C_ADDR,TAS5721_I2C_REG_MASTERVOL,HW_mastervol);
   PL_debug("PL_HW_set_volume(TAS5721): 0x%x, 0x%x, I2C write result: %d",TAS5721_I2C_REG_MASTERVOL,HW_mastervol,i2c_result);
 
-  bcm2835_i2c_end();
+  //bcm2835_i2c_end();
 
   return 1;
  }
@@ -102,9 +102,9 @@ uint8_t PL_HW_enable_amp()
  {
   uint8_t i2c_result;
 
-  bcm2835_i2c_begin();
-  bcm2835_i2c_set_baudrate(TAS5721_I2C_BAUDRATE);
-  bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_2500);
+  //bcm2835_i2c_begin();
+  //bcm2835_i2c_set_baudrate(TAS5721_I2C_BAUDRATE);
+  //bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_2500);
 
   i2c_result = I2C_WriteByteRegister(TAS5721_I2C_ADDR,TAS5721_I2C_REG_SYSCTRL2,0x84);
   PL_debug("PL_HW_enable_amp(TAS5721): 0x%x, 0x%x, I2C write result: %d",TAS5721_I2C_REG_SYSCTRL2,0x84,i2c_result);
@@ -113,7 +113,7 @@ uint8_t PL_HW_enable_amp()
 
   PL_HW_set_amp_HW_volume(G_config.HW_volume_L,G_config.HW_volume_R,G_config.HW_volume_S,G_config.HW_mastervol);
 
-  bcm2835_i2c_end();
+  //bcm2835_i2c_end();
   return 1;
  }
 
@@ -121,16 +121,16 @@ uint8_t PL_HW_shutdown_amp()
  {
   uint8_t i2c_result;
 
-  bcm2835_i2c_begin();
-  bcm2835_i2c_set_baudrate(TAS5721_I2C_BAUDRATE);
-  bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_2500);
+  //bcm2835_i2c_begin();
+  //bcm2835_i2c_set_baudrate(TAS5721_I2C_BAUDRATE);
+  //bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_2500);
 
   i2c_result = I2C_WriteByteRegister(TAS5721_I2C_ADDR,TAS5721_I2C_REG_SOFTMUTE,0x07);
   PL_debug("PL_HW_shutdown_amp(TAS5721): 0x%x, 0x%x, I2C write result: %d",TAS5721_I2C_REG_SOFTMUTE,0x07,i2c_result);
   i2c_result = I2C_WriteByteRegister(TAS5721_I2C_ADDR,TAS5721_I2C_REG_SYSCTRL2,0x04);
   PL_debug("PL_HW_shutdown_amp(TAS5721): 0x%x, 0x%x, I2C write result: %d",TAS5721_I2C_REG_SYSCTRL2,0x04,i2c_result);
 
-  bcm2835_i2c_end();
+  //bcm2835_i2c_end();
   return 1;
  }
 

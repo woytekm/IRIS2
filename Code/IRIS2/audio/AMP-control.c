@@ -24,6 +24,10 @@ uint8_t PL_init_amp()
    G_config.HW_volume_S = AMP_INIT_SUBWOOFER_GAIN;
    G_config.HW_mastervol =  AMP_INIT_MASTERVOL;
 
+   bcm2835_i2c_begin();
+   bcm2835_i2c_set_baudrate(TAS5721_I2C_BAUDRATE);
+   bcm2835_i2c_setClockDivider(BCM2835_I2C_CLOCK_DIVIDER_2500);
+
    if(!PL_HW_init_amp()) return 0;
    if(!PL_HW_set_amp_HW_volume(G_config.HW_volume_L,G_config.HW_volume_R,G_config.HW_volume_S,G_config.HW_mastervol)) return 0;
    return 1;

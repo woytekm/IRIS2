@@ -44,6 +44,7 @@ void PL_clock_thread(void)
    uint8_t flip = 0, some_alarms_active, prev_hour = 25,i;
    alarm_data_t *alarm;
    uint8_t TTS_thread_msg[2];
+   uint8_t x_first,x_second,x_third,x_fourth;
    
    while(1)
      {
@@ -55,30 +56,46 @@ void PL_clock_thread(void)
        {
          if(i == 1)
           {
-            sprintf(timestr,"%02d:%02d",G_tm->tm_hour,G_tm->tm_min);
+            sprintf(timestr,"%2d:%02d",G_tm->tm_hour,G_tm->tm_min);
             i = 0;
           }
          else
           {
             i = 1;
-            sprintf(timestr,"%02d %02d",G_tm->tm_hour,G_tm->tm_min);
+            sprintf(timestr,"%2d %02d",G_tm->tm_hour,G_tm->tm_min);
           }
 
          m_clear();
-         m_setcursor(10,15);
+         if(timestr[0] == ' ')
+          x_first = 8;
+         else if(timestr[0] == '1')
+          x_first = 10;
+         else if(timestr[0] == '2')
+          x_first = 10;
+
+         m_setcursor(x_first,15);
          m_writechar(timestr[0],1,18,0);
 
-         if(timestr[0] == '1')
-           m_setcursor(18,15);
-         else
-           m_setcursor(20,15);
+         if(timestr[0] == ' ')
+           x_second = 16;
+         else if(timestr[0] == '1')
+           x_second = 18;
+         else if(timestr[0] == '2')
+           x_second = 20;
 
-         m_writechar(timestr[1],1,18,0);
-         m_writechar(timestr[2],1,18,0);
+         m_setcursor(x_second,15);
+
+         m_writechar(timestr[1],1,18,0);  // second digit
+         m_writechar(timestr[2],1,18,0);  // semicolon
+
          if(timestr[0] == '1')
-           m_setcursor(32,15);
-         else
-           m_setcursor(34,15);
+           x_third = 32;
+         else if(timestr[0] == '2')
+           x_third = 32;
+         else if(timestr[0] == ' ')
+           x_third = 31;
+         
+         m_setcursor(x_third,15);
          m_writechar(timestr[3],1,18,0);
          m_writechar(timestr[4],1,18,0);
          m_display();
@@ -105,7 +122,7 @@ void PL_clock_thread(void)
        {
         if(flip)
          sprintf(timestr,"%02d:%02d",G_tm->tm_hour, G_tm->tm_min);
-        else if( (G_player_mode == PLAYER_STREAM) || (G_display_mode_lower_row == DISPLAY_MODE_RSS) )
+        else if( (G_player_mode == PLAYER_STREAM) || (G_display_mode_lower_row == DISPLAY_MODE_RSS) || G_config.bt_sink )
          sprintf(timestr,"%02d %02d",G_tm->tm_hour, G_tm->tm_min);
         else
          sprintf(timestr,"     "); // crude screen saver - this should be substituted with large graphic clock moving across the screen when unit is idle

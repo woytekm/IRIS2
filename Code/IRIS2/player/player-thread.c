@@ -76,7 +76,7 @@ void PL_player_display_thread(void)
 
      if((G_config.bt_sink) && (G_player_mode == PLAYER_STOP))
        {
-        sprintf(bt_meta,"BT: %s - %s (%s)",G_bt_found_artist,G_bt_found_title,G_bt_found_album);
+        sprintf(bt_meta,"BT: %s - %s (%s )",G_bt_found_artist,G_bt_found_title,G_bt_found_album);
         my_spi_WEH001602_scroll_meta_once(bt_meta, TOP_ROW);
         sleep(1);
        }
@@ -214,7 +214,7 @@ void PL_player_thread(void)
         if(!bt_sink_inited)
          {
           PL_debug("PL_player_thread: bluetooth sink init.");
-          output = 2;
+          output = AUDIO_OUT_INTERNAL;
           BASS_err = BASS_ErrorGetCode();
           BASS_Init(output,44100,0,0,NULL);
           PL_debug("PL_player_thread: bluetooth sink init: output init: %d",BASS_err);

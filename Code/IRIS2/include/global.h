@@ -36,7 +36,7 @@
 #include <linux/sched.h>
 
 #define AUDIO_OUT_DEFAULT -1  // for ALSA bluetooth output 
-//#define AUDIO_OUT_INTERNAL 2  // BASS detects BCM2835 internal audio as #2
+//#define AUDIO_OUT_INTERNAL 1  // BASS detects BCM2835 internal audio as #2
 #define AUDIO_OUT_INTERNAL 2  // I2S audio (?)
 
 
@@ -226,7 +226,7 @@ char G_bt_found_artist[128];
 #define PERSISTENCE_CHECK_LOOP_DLY 20  // in seconds
 #define PERSISTENCE_DATA_SIG 6767
 
-#define VOLUME_MSG_DLY 50000
+#define VOLUME_MSG_DLY 90000
 
 uint8_t G_BASS_in_use;
 
