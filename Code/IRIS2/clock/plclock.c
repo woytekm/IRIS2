@@ -36,6 +36,19 @@ void PL_clear_alarms_trigger_flag(void)
 
  }
 
+PL_matrix_alarm_sign(x,y,color)
+ {
+  m_putpixel(x+3,y,color);
+  m_putaline(x+2,y+1,x+4,y+1,color);
+  m_putaline(x+2,y+2,x+4,y+2,color);
+  m_putaline(x+1,y+3,x+5,y+3,color);
+  m_putaline(x+1,y+4,x+5,y+4,color);
+  m_putaline(x+1,y+5,x+5,y+5,color);
+  m_putaline(x,y+6,x+6,y+6,color);
+  m_putaline(x+2,y+7,x+4,y+7,color);
+  m_putpixel(x+3,y+8,color);
+}
+
 void PL_clock_thread(void)
  {
 
@@ -51,56 +64,6 @@ void PL_clock_thread(void)
 
       time(&now);
       G_tm = localtime(&now);
-
-      if(G_matrix_mode == MATRIX_MODE_CLOCK)
-       {
-         if(i == 1)
-          {
-            sprintf(timestr,"%2d:%02d",G_tm->tm_hour,G_tm->tm_min);
-            i = 0;
-          }
-         else
-          {
-            i = 1;
-            sprintf(timestr,"%2d %02d",G_tm->tm_hour,G_tm->tm_min);
-          }
-
-         m_clear();
-         if(timestr[0] == ' ')
-          x_first = 8;
-         else if(timestr[0] == '1')
-          x_first = 10;
-         else if(timestr[0] == '2')
-          x_first = 10;
-
-         m_setcursor(x_first,15);
-         m_writechar(timestr[0],1,18,0);
-
-         if(timestr[0] == ' ')
-           x_second = 16;
-         else if(timestr[0] == '1')
-           x_second = 18;
-         else if(timestr[0] == '2')
-           x_second = 20;
-
-         m_setcursor(x_second,15);
-
-         m_writechar(timestr[1],1,18,0);  // second digit
-         m_writechar(timestr[2],1,18,0);  // semicolon
-
-         if(timestr[0] == '1')
-           x_third = 32;
-         else if(timestr[0] == '2')
-           x_third = 32;
-         else if(timestr[0] == ' ')
-           x_third = 31;
-         
-         m_setcursor(x_third,15);
-         m_writechar(timestr[3],1,18,0);
-         m_writechar(timestr[4],1,18,0);
-         m_display();
-
-       }
 
       if(G_global_mode == GLOBAL_MODE_SETUP)
        {
@@ -230,7 +193,7 @@ void PL_clock_thread(void)
 
        }
      
-      if(G_display_mode_lower_row == DISPLAY_MODE_CLOCK) 
+      if((G_display_mode_lower_row == DISPLAY_MODE_CLOCK) && (G_player_mode != PLAYER_STOP))
        {
         pthread_mutex_lock(&G_display_lock);
         if(some_alarms_active)
@@ -238,6 +201,53 @@ void PL_clock_thread(void)
         else
           my_spi_WEH001602_out_text_at_col(BOTTOM_ROW, 11, " \0");
         pthread_mutex_unlock(&G_display_lock);
+       }
+      else if(G_player_mode == PLAYER_STOP)
+       {
+        pthread_mutex_lock(&G_display_lock);
+        my_spi_WEH001602_out_text_at_col(BOTTOM_ROW, 11, " \0");
+        pthread_mutex_unlock(&G_display_lock);
+       }
+
+      if(G_matrix_mode == MATRIX_MODE_CLOCK)
+       {
+         if(i == 1)
+          {
+            sprintf(timestr,"%2d:%02d",G_tm->tm_hour,G_tm->tm_min);
+            i = 0;
+          }
+         else
+          {
+            i = 1;
+            sprintf(timestr,"%2d %02d",G_tm->tm_hour,G_tm->tm_min);
+          }
+
+         m_clear();
+
+         m_setcursor(4,15);
+         m_writechar(timestr[0],1,18,0);
+
+         //if(timestr[0] == '1')
+         //  m_setcursor(18,15);
+         //else
+         //  m_setcursor(20,15);
+
+         m_writechar(timestr[1],1,18,0);
+         m_setcursor(23,15);
+         m_writechar(timestr[2],1,18,0);
+         m_setcursor(31,15);
+         //if(timestr[0] == '1')
+         //  m_setcursor(32,15);
+         //else
+         //  m_setcursor(34,15);
+         m_writechar(timestr[3],1,18,0);
+         m_writechar(timestr[4],1,18,0);
+
+
+         if(some_alarms_active)
+           PL_matrix_alarm_sign(55,4,8);
+
+         m_display();
        }
 
       usleep(950000);

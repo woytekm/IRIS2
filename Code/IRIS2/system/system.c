@@ -105,6 +105,9 @@ void PL_init(void)
   G_config.tts_speed = 100;
   G_config.tts_pitch = 100;
   G_config.tts_volume = 100;
+  G_config.FFT_base_color = 24;
+  G_config.FFT_marker_color = 19;
+  G_config.FFT_gradient_color = 0;
 
   PL_debug("PL_init: global variables inited");
 

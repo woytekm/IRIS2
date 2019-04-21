@@ -7,6 +7,7 @@
 #include "FreeSans9pt7b.h"
 #include "FreeMonoBold9pt7b.h"
 #include "FreeSerifBold9pt7b.h"
+#include "Cousine_Bold9pt7b.h"
 #include "Picopixel.h"
 #include "Org01.h"
 
@@ -44,7 +45,10 @@ void m_init(void)
   mi_init_spi();
   bzero(&mi_matrix_commit_buffer,MATRIXBUFLEN);
   bzero(&mi_matrix_edit_buffer,MATRIXBUFLEN);
-  gfxFont = &FreeSansBold9pt7b;
+  //gfxFont = &FreeSansBold9pt7b;
+  //gfxFont = &FreeMonoBold9pt7b;
+  gfxFont = &Cousine_Bold9pt7b;
+  //gfxFont = &MyFont_Bold9pt7bBitmaps;
   _width = MATRIXLEN;
   _height = MATRIXHEIGHT;
   mi_debug = 0;

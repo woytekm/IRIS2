@@ -96,8 +96,8 @@ void PL_matrix_analyser_display(float *fft_buffer, uint8_t mode, uint8_t color_s
      else val = FFT_values_64_scaled[i];
     if(val)
      {
-      m_putvline(i,(31-val),val+1,24);
-      m_putpixel(i,(31-val),19);
+      m_putvline(i,(31-val),val+1,G_config.FFT_base_color);
+      m_putpixel(i,(31-val),G_config.FFT_marker_color);
      }
    }
   m_display();

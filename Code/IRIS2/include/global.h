@@ -351,6 +351,9 @@ typedef struct _iris_config_t {
     uint8_t HW_volume_R;
     uint8_t HW_volume_S;
     uint8_t HW_mastervol;
+    uint8_t FFT_base_color;
+    uint8_t FFT_marker_color;
+    uint8_t FFT_gradient_color;
 } iris_config_t;
 
 iris_config_t G_config;
