@@ -8,6 +8,9 @@
 #include "FreeMonoBold9pt7b.h"
 #include "FreeSerifBold9pt7b.h"
 #include "Cousine_Bold9pt7b.h"
+#include "Cousine_Bold9pt7b_mod.h"
+#include "Cousine_Bold7pt7b_mod.h"
+#include "Cousine_Bold8pt7b_mod.h"
 #include "Picopixel.h"
 #include "Org01.h"
 
@@ -47,7 +50,8 @@ void m_init(void)
   bzero(&mi_matrix_edit_buffer,MATRIXBUFLEN);
   //gfxFont = &FreeSansBold9pt7b;
   //gfxFont = &FreeMonoBold9pt7b;
-  gfxFont = &Cousine_Bold9pt7b;
+  gfxFont = &Cousine_Bold_edit9pt7b;
+  gfxFontSmall = &Cousine_Bold_edit8pt7b;
   //gfxFont = &MyFont_Bold9pt7bBitmaps;
   _width = MATRIXLEN;
   _height = MATRIXHEIGHT;
@@ -157,6 +161,48 @@ void m_putfillrect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
  }
 
 
+void mf_putchar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg, uint8_t size, GFXfont *font)
+ {
+
+    c -= (uint8_t)pgm_read_byte(&font->first);
+    GFXglyph *glyph  = &(((GFXglyph *)pgm_read_pointer(&font->glyph))[c]);
+    uint8_t  *bitmap = (uint8_t *)pgm_read_pointer(&font->bitmap);
+
+    uint16_t bo = pgm_read_word(&glyph->bitmapOffset);
+    uint8_t  w  = pgm_read_byte(&glyph->width),
+             h  = pgm_read_byte(&glyph->height);
+    int8_t   xo = pgm_read_byte(&glyph->xOffset),
+             yo = pgm_read_byte(&glyph->yOffset);
+    uint8_t  xx, yy, bits = 0, bit = 0;
+    int16_t  xo16 = 0, yo16 = 0;
+
+    if(size > 1) {
+        xo16 = xo;
+        yo16 = yo;
+     }
+
+    for(yy=0; yy<h; yy++)
+     {
+       for(xx=0; xx<w; xx++)
+        {
+            if(!(bit++ & 7)) {
+                bits = pgm_read_byte(&bitmap[bo++]);
+                }
+            if(bits & 0x80) {
+                if(size == 1) {
+                   m_putpixel(x+xo+xx, y+yo+yy, color);
+                 } else {
+                   m_putfillrect(x+(xo16+xx)*size, y+(yo16+yy)*size,
+                    size, size, color);
+                 }
+              }
+             bits <<= 1;
+       }
+    }
+
+ }
+
+
 void m_putchar(int16_t x, int16_t y, unsigned char c, uint16_t color, uint16_t bg, uint8_t size)
  {
 
@@ -231,6 +277,41 @@ void m_writechar(uint8_t c, uint8_t textsize, uint16_t textcolor, uint16_t textb
                 cursor_y += (int16_t)textsize * (uint8_t)pgm_read_byte(&gfxFont->yAdvance);
                }
              m_putchar(cursor_x, cursor_y, c, textcolor, textbgcolor, textsize);
+           }
+         cursor_x += (uint8_t)pgm_read_byte(&glyph->xAdvance) * (int16_t)textsize;
+       }
+     }
+
+  }
+
+
+void mf_writechar(uint8_t c, uint8_t textsize, uint16_t textcolor, uint16_t textbgcolor, GFXfont *font)
+ {
+
+   uint8_t wrap = 1;
+
+   if(c == '\n')
+    {
+     cursor_x  = 0;
+     cursor_y += (int16_t)textsize * (uint8_t)pgm_read_byte(&font->yAdvance);
+    }
+   else if(c != '\r')
+    {
+     uint8_t first = pgm_read_byte(&font->first);
+     if((c >= first) && (c <= (uint8_t)pgm_read_byte(&font->last)))
+       {
+        GFXglyph *glyph = &(((GFXglyph *)pgm_read_pointer(&font->glyph))[c - first]);
+        uint8_t   w = pgm_read_byte(&glyph->width),
+                  h = pgm_read_byte(&glyph->height);
+        if((w > 0) && (h > 0))
+           { // Is there an associated bitmap?
+            int16_t xo = (int8_t)pgm_read_byte(&glyph->xOffset); // sic
+            if(wrap && ((cursor_x + textsize * (xo + w)) > _width))
+              {
+                cursor_x  = 0;
+                cursor_y += (int16_t)textsize * (uint8_t)pgm_read_byte(&font->yAdvance);
+               }
+             mf_putchar(cursor_x, cursor_y, c, textcolor, textbgcolor, textsize, font);
            }
          cursor_x += (uint8_t)pgm_read_byte(&glyph->xAdvance) * (int16_t)textsize;
        }

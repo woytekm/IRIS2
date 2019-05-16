@@ -19,6 +19,7 @@ uint8_t mi_brightness;
 uint8_t mi_debug;
 
 const GFXfont *gfxFont;
+const GFXfont *gfxFontSmall;
 
 uint16_t cursor_x;
 uint16_t cursor_y;

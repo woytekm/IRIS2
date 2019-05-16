@@ -1,6 +1,7 @@
 #include "global.h"
 #include "WEH001602-lib.h"
 #include "tts.h"
+#include "matrixlib.h"
 
 alarm_data_t *PL_new_alarm(uint8_t hour, uint8_t minute, uint8_t days_of_week, uint8_t al_state, uint8_t al_type, uint8_t sound_idx)
  {
@@ -42,11 +43,11 @@ PL_matrix_alarm_sign(x,y,color)
   m_putaline(x+2,y+1,x+4,y+1,color);
   m_putaline(x+2,y+2,x+4,y+2,color);
   m_putaline(x+1,y+3,x+5,y+3,color);
-  m_putaline(x+1,y+4,x+5,y+4,color);
-  m_putaline(x+1,y+5,x+5,y+5,color);
-  m_putaline(x,y+6,x+6,y+6,color);
-  m_putaline(x+2,y+7,x+4,y+7,color);
-  m_putpixel(x+3,y+8,color);
+  //m_putaline(x+1,y+4,x+5,y+4,color);
+  //m_putaline(x+1,y+5,x+5,y+5,color);
+  //m_putaline(x,y+6,x+6,y+6,color);
+  //m_putaline(x+2,y+7,x+4,y+7,color);
+  m_putpixel(x+3,y+4,color);
 }
 
 void PL_clock_thread(void)
@@ -225,23 +226,29 @@ void PL_clock_thread(void)
          m_clear();
 
          m_setcursor(4,15);
-         m_writechar(timestr[0],1,18,0);
+         mf_writechar(timestr[0],1,18,0,gfxFont);
 
          //if(timestr[0] == '1')
          //  m_setcursor(18,15);
          //else
          //  m_setcursor(20,15);
 
-         m_writechar(timestr[1],1,18,0);
+         mf_writechar(timestr[1],1,18,0,gfxFont);
          m_setcursor(23,15);
-         m_writechar(timestr[2],1,18,0);
+         mf_writechar(timestr[2],1,18,0,gfxFont);
          m_setcursor(31,15);
          //if(timestr[0] == '1')
          //  m_setcursor(32,15);
          //else
          //  m_setcursor(34,15);
-         m_writechar(timestr[3],1,18,0);
-         m_writechar(timestr[4],1,18,0);
+         mf_writechar(timestr[3],1,18,0,gfxFont);
+         mf_writechar(timestr[4],1,18,0,gfxFont);
+
+         // m_setcursor(8,29);
+         // mf_writechar('1',1,20,0,gfxFontSmall);
+         // mf_writechar('2',1,20,0,gfxFontSmall);
+         // mf_writechar('\xB0',1,20,0,gfxFontSmall);
+        
 
 
          if(some_alarms_active)
