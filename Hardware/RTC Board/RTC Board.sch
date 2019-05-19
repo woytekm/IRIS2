@@ -5,7 +5,7 @@ EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
-Title "Audio Board with TAS5721 in 2+1 mode"
+Title "IRIS2: RTC+NVRAM board"
 Date ""
 Rev ""
 Comp ""
