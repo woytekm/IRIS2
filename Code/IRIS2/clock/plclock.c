@@ -66,13 +66,13 @@ void PL_clock_thread(void)
       time(&now);
       G_tm = localtime(&now);
 
-      if(G_global_mode == GLOBAL_MODE_SETUP)
-       {
-        usleep(950000);
-        continue;
-       }
+      //if(G_global_mode == GLOBAL_MODE_SETUP)
+      // {
+      //  usleep(950000);
+      //  continue;
+      // }
 
-      if(G_display_mode_lower_row == DISPLAY_MODE_CLOCK_DATE)
+      if((G_display_mode_lower_row == DISPLAY_MODE_CLOCK_DATE) && (G_global_mode != GLOBAL_MODE_SETUP))
        {
         if(flip)
          sprintf(timestr,"%02d:%02d %02d/%02d/%02d",G_tm->tm_hour, G_tm->tm_min, G_tm->tm_mday, G_tm->tm_mon, G_tm->tm_year-100);
@@ -82,7 +82,7 @@ void PL_clock_thread(void)
          sprintf(timestr,"                       "); // crude screen saver - this should be substituted with large graphic clock moving across the screen when unit is idle
        }
 
-      if(G_display_mode_lower_row == DISPLAY_MODE_CLOCK)
+      if((G_display_mode_lower_row == DISPLAY_MODE_CLOCK) && (G_global_mode != GLOBAL_MODE_SETUP))
        {
         if(flip)
          sprintf(timestr,"%02d:%02d",G_tm->tm_hour, G_tm->tm_min);
@@ -96,14 +96,14 @@ void PL_clock_thread(void)
 
        }
 	   
-      if(G_display_mode_lower_row == DISPLAY_MODE_CLOCK_DATE)
+      if((G_display_mode_lower_row == DISPLAY_MODE_CLOCK_DATE) && (G_global_mode != GLOBAL_MODE_SETUP))
        {
         flip = 1 - flip;
         pthread_mutex_lock(&G_display_lock);
         my_spi_WEH001602_out_text_at_col(BOTTOM_ROW, 1, &timestr);
         pthread_mutex_unlock(&G_display_lock);
        }
-      else if(G_display_mode_lower_row == DISPLAY_MODE_CLOCK)
+      else if((G_display_mode_lower_row == DISPLAY_MODE_CLOCK) && (G_global_mode != GLOBAL_MODE_SETUP))
        {
         flip = 1 - flip;
         pthread_mutex_lock(&G_display_lock);
@@ -128,7 +128,7 @@ void PL_clock_thread(void)
      if(G_sleep_timer_active)
        G_sleep_timer_counter++;
 
-     if(G_sleep_timer_counter == (G_config.sleep_timer_time*60))
+     if( (G_sleep_timer_counter == (G_config.sleep_timer_time*60)) && (G_global_mode != GLOBAL_MODE_SETUP) )
       {
        G_player_mode = PLAYER_STOP;      
        G_sleep_timer_active = 0; G_sleep_timer_counter = 0;
@@ -137,7 +137,6 @@ void PL_clock_thread(void)
        pthread_mutex_unlock(&G_display_lock);
        PL_debug("PL_clock_thread: sleep timer reached programmed value %d min. - streaming stopped (if was active)",G_config.sleep_timer_time);
       }
-
 
      alarm = G_alarms;
      some_alarms_active = 0;
@@ -194,7 +193,7 @@ void PL_clock_thread(void)
 
        }
      
-      if((G_display_mode_lower_row == DISPLAY_MODE_CLOCK) && (G_player_mode != PLAYER_STOP))
+      if((G_display_mode_lower_row == DISPLAY_MODE_CLOCK) && (G_player_mode != PLAYER_STOP) && (G_global_mode != GLOBAL_MODE_SETUP))
        {
         pthread_mutex_lock(&G_display_lock);
         if(some_alarms_active)
@@ -203,7 +202,7 @@ void PL_clock_thread(void)
           my_spi_WEH001602_out_text_at_col(BOTTOM_ROW, 11, " \0");
         pthread_mutex_unlock(&G_display_lock);
        }
-      else if(G_player_mode == PLAYER_STOP)
+      else if((G_player_mode == PLAYER_STOP) && (G_global_mode != GLOBAL_MODE_SETUP))
        {
         pthread_mutex_lock(&G_display_lock);
         my_spi_WEH001602_out_text_at_col(BOTTOM_ROW, 11, " \0");
@@ -224,6 +223,8 @@ void PL_clock_thread(void)
           }
 
          m_clear();
+
+         m_set_brightness(G_config.matrix_brightness);
 
          m_setcursor(4,15);
          mf_writechar(timestr[0],1,18,0,gfxFont);

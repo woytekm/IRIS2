@@ -8,4 +8,4 @@ INCLUDES = -I wifi -I alarm -I config -I system -I player -I include -I clock -I
 MAIN_EXE = Iris
 MAIN_EXE_STATIC = Iris-static
 EXEDEPS = ../clock/libplclock.a ../display/libWEH001602.a ../rss/librss-reader.a ../player/libplayer.a ../keyboard/libkeyboard.a ../config/libconfig.a ../setup/libsetup.a ../tts/librss-tts.a ../system/libsystem.a ../alarm/libalarm.a ../wifi/libwifi.a ../matrix/libmatrix.a ../audio/libaudio.a ../bluetooth/libbluetooth.a
-CFLAGS =  -Wno-implicit-function-declaration
+CFLAGS =  -Wno-implicit-function-declaration -Wno-int-conversion -Wno-implicit-int -Wno-incompatible-pointer-types

@@ -138,7 +138,7 @@ if [ "$1" = "dump" ]   ## dump cache contents
 
 if [ "$1" = "realdump" ] ## dump real nvram contents
  then
-  dd if=/dev/nvram bs=128 count=64 2>/dev/nul
+  dd if=/dev/nvram bs=128 count=64 2>/dev/null
   exit
  fi
 

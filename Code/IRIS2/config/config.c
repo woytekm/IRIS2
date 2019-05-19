@@ -356,6 +356,13 @@ uint8_t PL_build_config(unsigned char *config_buffer)
   sprintf(&config_buffer[config_buffer_pos],"%s",config_line);
   config_buffer_pos += strlen(config_line);
 
+  sprintf(config_line,"FFT_base_color=%d\n",G_config.FFT_base_color);
+  sprintf(&config_buffer[config_buffer_pos],"%s",config_line);
+  config_buffer_pos += strlen(config_line);
+
+  sprintf(config_line,"FFT_marker_color=%d\n",G_config.FFT_marker_color);
+  sprintf(&config_buffer[config_buffer_pos],"%s",config_line);
+  config_buffer_pos += strlen(config_line);
 
   if(strlen(G_config.bt_pair_with >= 3))
    {
