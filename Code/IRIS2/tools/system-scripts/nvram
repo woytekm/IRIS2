@@ -26,7 +26,7 @@ refresh_nvram_cache()
 
 write_nvram_cache()
  {
-  cat $NVRAM_CACHE | grep -v -e "^#" > $NVRAM_CACHE.tmp
+  cat $NVRAM_CACHE | grep -a -v -e "^#" > $NVRAM_CACHE.tmp
   DT=`date +%D@%T`
   echo "# $PRODUCT nvram data :: written on $DT by nvram_script" > $NVRAM_CACHE
   cat $NVRAM_CACHE.tmp >> $NVRAM_CACHE
@@ -61,13 +61,13 @@ write_nvram_etc_settings()
 
 clear_nvram_cache()
  {
-  cat $NVRAM_CACHE | grep -e \= -e \# > $NVRAM_CACHE.tmp
+  cat $NVRAM_CACHE | grep -a -e \= -e \# > $NVRAM_CACHE.tmp
   mv $NVRAM_CACHE.tmp $NVRAM_CACHE
  }
 
 if [ "$1" = "get" ]  ## display all occurences of this key
  then
-  cat $NVRAM_CACHE | grep $2 | awk 'BEGIN{FS="=";}{print $2;}'
+  cat $NVRAM_CACHE | grep -a $2 | awk 'BEGIN{FS="=";}{print $2;}'
   exit
  fi
 
@@ -77,7 +77,7 @@ if [ "$1" = "set" ]  ## change first occurence of this key, or add new
   VAL=`echo "$2" | awk 'BEGIN{FS="=";}{printf $2; if($3!="") printf "="$3; if($4!="") printf "="$4; if($5!="") printf "="$5; if($6!="") printf "="$6; printf "\n";}'`
   validate_key_val $KEY $VAL
 
-  KEY_COUNT=`cat $NVRAM_CACHE | grep $KEY | wc -l`
+  KEY_COUNT=`cat $NVRAM_CACHE | grep -a $KEY | wc -l`
   if [ $KEY_COUNT -gt 0 ]
    then
     cat $NVRAM_CACHE | awk -v key=$KEY -v val=$VAL 'BEGIN{FS="="; first=1;}{if(($1==key)&&first) {print key"="val; first=0;} else print;}' > $NVRAM_CACHE.tmp
@@ -102,7 +102,7 @@ if [ "$1" = "add" ] ## add new key
 
 if [ "$1" = "delete" ] ## delete first occurence of this key
  then
-  KEY_COUNT=`cat $NVRAM_CACHE | grep "$2" | wc -l`
+  KEY_COUNT=`cat $NVRAM_CACHE | grep -a "$2" | wc -l`
   if [ $KEY_COUNT -gt 0 ]
    then
     cat $NVRAM_CACHE | awk -v av="$2" 'BEGIN{FS="="; first=1;split(av,a,"="); val=a[2];}{if($2==val){} else print;}' > $NVRAM_CACHE.tmp

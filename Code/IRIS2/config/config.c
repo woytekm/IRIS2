@@ -364,12 +364,13 @@ uint8_t PL_build_config(unsigned char *config_buffer)
   sprintf(&config_buffer[config_buffer_pos],"%s",config_line);
   config_buffer_pos += strlen(config_line);
 
-  if(strlen(G_config.bt_pair_with >= 3))
-   {
-    sprintf(config_line,"bt_pair_with=%s\n",G_config.bt_pair_with);
-    sprintf(&config_buffer[config_buffer_pos],"%s",config_line);
-    config_buffer_pos += strlen(config_line);
-   }
+  if(G_config.bt_pair_with != NULL)
+   if(strlen(G_config.bt_pair_with) >= 3)
+    {
+     sprintf(config_line,"bt_pair_with=%s\n",G_config.bt_pair_with);
+     sprintf(&config_buffer[config_buffer_pos],"%s",config_line);
+     config_buffer_pos += strlen(config_line);
+    }
 
   if(strlen(G_config.bt_speaker) >= 10)
    {
@@ -779,7 +780,30 @@ void PL_parse_config_av(unsigned char *avpair)
        else
         PL_debug("PL_parse_config_av: invalid TTS volume: %d",tmp_val);
        break;
-  
+
+       case CONFIG_ATTR_FFT_BASE_COL:
+       tmp_val = atoi(value);
+       if((tmp_val>0) && (tmp_val<64))
+        {
+         G_config.FFT_base_color = tmp_val;
+         PL_debug("PL_parse_config_av: parsed FFT base color: %d",G_config.FFT_base_color);
+        }
+       else
+        PL_debug("PL_parse_config_av: invalid FFT base color: %d",tmp_val);
+       break;
+
+      case CONFIG_ATTR_FFT_MARKER_COL:
+       tmp_val = atoi(value);
+       if((tmp_val>0) && (tmp_val<64))
+        {
+         G_config.FFT_marker_color = tmp_val;
+         PL_debug("PL_parse_config_av: parsed FFT marker color: %d",G_config.FFT_marker_color);
+        }
+       else
+        PL_debug("PL_parse_config_av: invalid FFT marker color: %d",tmp_val);
+       break;
+
+
       case CONFIG_ATTR_ALARM_SOUND:
 	   PL_parse_alarm_sound_def(value);
        PL_debug("PL_parse_config_av: parsed alarm sound definition");	   
