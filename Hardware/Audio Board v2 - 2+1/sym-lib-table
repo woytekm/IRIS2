@@ -1,0 +1,6 @@
+(sym_lib_table
+  (lib (name TPA3110D2PWPR)(type Legacy)(uri ${KIPRJMOD}/TPA3110D2PWPR.lib)(options "")(descr ""))
+  (lib (name PGA2311)(type Legacy)(uri "/Users/wojtek/Documents/BigRadio/Audio Board/PGA2311.lib")(options "")(descr ""))
+  (lib (name mt3608)(type Legacy)(uri ${KIPRJMOD}/mt3608.lib)(options "")(descr ""))
+  (lib (name TAS5721)(type Legacy)(uri "/Users/wojtek/Documents/BigRadio/Audio Board v2 - 2+1/TAS5721.lib")(options "")(descr ""))
+)
