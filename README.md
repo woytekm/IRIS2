@@ -1,7 +1,7 @@
 
 IRIS2 network radio project. This repository will contain all the necessary information required to build the unit.
 
-Project images and clips: https://drive.google.com/open?id=105BILNTAdYNRVomJvfbO0CPW3QA1uIXu
+Project images and video clips: https://drive.google.com/open?id=105BILNTAdYNRVomJvfbO0CPW3QA1uIXu
 
 Currently we have here:
  - Code for core Iris application along with all necessary system scripts 
