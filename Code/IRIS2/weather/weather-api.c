@@ -38,9 +38,6 @@ static size_t write_response(void *ptr, size_t size, size_t nmemb, void *stream)
     return size * nmemb;
 }
 
-
-
-
 static char *weather_api_request(const char *url)
 {
     CURL *curl = NULL;
@@ -160,15 +157,14 @@ void PL_weather_api_thread(void)
 
   G_last_weather_API_call_status = 0;
 
-
-  if( (strlen(G_config.rapidapi_weather_key) < 10) || (strlen(G_config.weather_location) < 5) )
+  if((strlen(G_config.rapidapi_weather_key) < 10) || (strlen(G_config.weather_location) < 5))
    {
      PL_debug("PL_weather_api_thread: no API key or no location (or both) in nvram. Disabling weather feature.");
      G_config.get_weather = 0;
      G_config.matrix_weather = 0;
      G_config.matrix_temperature = 0;
    }
-  else if(G_config.get_weather)
+  else if(G_config.get_weather == 1)
    {
      PL_debug("PL_weather_api_thread: enabling weather feature for %s.",G_config.weather_location);
    }
