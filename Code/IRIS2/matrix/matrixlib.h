@@ -29,6 +29,7 @@ uint16_t _height;
 void m_clear(void);
 void m_init(void);
 void m_set_brightness(uint8_t brightness);
+void display_bitmap_at(uint8_t *bitmap, uint8_t xsize, uint8_t ysize, uint8_t xpos, uint8_t ypos);
 void m_putpixel(uint8_t x, uint8_t y, uint16_t color);
 void m_putaline(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t color);
 void m_putvline(int16_t x, int16_t y,int16_t h, uint16_t color);

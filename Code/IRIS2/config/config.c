@@ -364,6 +364,29 @@ uint8_t PL_build_config(unsigned char *config_buffer)
   sprintf(&config_buffer[config_buffer_pos],"%s",config_line);
   config_buffer_pos += strlen(config_line);
 
+  sprintf(config_line,"matrix_clock_color=%d\n",G_config.matrix_clock_color);
+  sprintf(&config_buffer[config_buffer_pos],"%s",config_line);
+  config_buffer_pos += strlen(config_line);
+
+  sprintf(config_line,"get_weather=%d\n",G_config.get_weather);
+  sprintf(&config_buffer[config_buffer_pos],"%s",config_line);
+  config_buffer_pos += strlen(config_line);
+
+  sprintf(config_line,"matrix_temperature=%d\n",G_config.matrix_temperature);
+  sprintf(&config_buffer[config_buffer_pos],"%s",config_line);
+  config_buffer_pos += strlen(config_line);
+
+  sprintf(config_line,"matrix_weather=%d\n",G_config.matrix_weather);
+  sprintf(&config_buffer[config_buffer_pos],"%s",config_line);
+  config_buffer_pos += strlen(config_line);
+
+  if(strlen(G_config.weather_location) >= 3)
+   {
+    sprintf(config_line,"weather_location=%s\n",G_config.weather_location);
+    sprintf(&config_buffer[config_buffer_pos],"%s",config_line);
+    config_buffer_pos += strlen(config_line);
+   }
+
   if(G_config.bt_pair_with != NULL)
    if(strlen(G_config.bt_pair_with) >= 3)
     {
@@ -385,6 +408,13 @@ uint8_t PL_build_config(unsigned char *config_buffer)
     sprintf(&config_buffer[config_buffer_pos],"%s",config_line);
     config_buffer_pos += strlen(config_line);
    }
+
+  if(strlen(G_config.rapidapi_weather_key) > 10)
+    {
+     sprintf(config_line,"rapidapi_weather_key=%s\n",G_config.rapidapi_weather_key);
+     sprintf(&config_buffer[config_buffer_pos],"%s",config_line);
+     config_buffer_pos += strlen(config_line);
+    }
 
   return 1;
 
@@ -748,6 +778,31 @@ void PL_parse_config_av(unsigned char *avpair)
        PL_debug("PL_parse_config_av: parsed hardware master volume: %d",G_config.HW_mastervol);
        break;
 
+      case CONFIG_ATTR_GET_WEATHER:
+       G_config.get_weather = atoi(value);
+       PL_debug("PL_parse_config_av: parsed get weather value: %d",G_config.get_weather);
+       break;
+
+      case CONFIG_ATTR_MATRIX_TEMP:
+       G_config.matrix_temperature = atoi(value);
+       PL_debug("PL_parse_config_av: parsed matrix temperature value: %d",G_config.matrix_temperature);
+       break;
+
+      case CONFIG_ATTR_MATRIX_WEATHER:
+       G_config.matrix_weather = atoi(value);
+       PL_debug("PL_parse_config_av: parsed matrix weather value: %d",G_config.matrix_weather);
+       break;
+
+      case CONFIG_ATTR_WEATHER_LOCATION:
+       strncpy(G_config.weather_location,value,255);
+       PL_debug("PL_parse_config_av: parsed weather location: [%s]",G_config.weather_location);
+       break;
+
+      case CONFIG_ATTR_RAPIDAPI_WEATHER_KEY:
+       strncpy(G_config.rapidapi_weather_key,value,255);
+       PL_debug("PL_parse_config_av: parsed Rapid API weather key: [%s]",G_config.rapidapi_weather_key);
+       break;
+
       case CONFIG_ATTR_TTS_SPEED:
        tmp_val = atoi(value);
        if((tmp_val>79) && (tmp_val<121))
@@ -801,6 +856,17 @@ void PL_parse_config_av(unsigned char *avpair)
         }
        else
         PL_debug("PL_parse_config_av: invalid FFT marker color: %d",tmp_val);
+       break;
+
+       case CONFIG_ATTR_MATRIX_CLOCK_COL:
+        tmp_val = atoi(value);
+        if((tmp_val>0) && (tmp_val<64))
+         {
+          G_config.matrix_clock_color = tmp_val;
+          PL_debug("PL_parse_config_av: parsed matrix clock color: %d",G_config.matrix_clock_color);
+         }
+       else
+       PL_debug("PL_parse_config_av: invalid matrix clock color: %d",tmp_val);
        break;
 
 

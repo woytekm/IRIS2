@@ -13,6 +13,8 @@
 #include "wifi_signal.h"
 #include "audio.h"
 #include "bluetooth.h"
+#include "matrix.h"
+#include "weather.h"
 
 
 main(int argc, char **argv)
@@ -69,6 +71,9 @@ main(int argc, char **argv)
   G_iris_tasks[TASK_AMP_HW_CTRL] = PL_start_task(TASK_AMP_HW_CTRL, PL_HW_amp_control_thread, NULL, SCHED_RR, 97);
   G_iris_tasks[TASK_BTCTRL] = PL_start_task(TASK_BTCTRL, PL_bluetoothctl_proxy_thread, NULL, SCHED_RR, 98);
   G_iris_tasks[TASK_BTPLAYERCTRL] = PL_start_task(TASK_BTPLAYERCTRL, PL_bluetoothplayer_proxy_thread, NULL, SCHED_RR, 99);
+  G_iris_tasks[TASK_MATRIX_DISPLAY] = PL_start_task(TASK_MATRIX_DISPLAY, PL_matrix_display_thread, NULL, SCHED_RR, 95);
+  G_iris_tasks[TASK_WEATHER_API] = PL_start_task(TASK_WEATHER_API, PL_weather_api_thread, NULL, SCHED_BATCH, 0);
+  G_iris_tasks[TASK_WEATHER_SCENERY] = PL_start_task(TASK_WEATHER_SCENERY, PL_weather_scenery_thread, NULL, SCHED_RR, 81);
 
   if(G_config.www_access)
    G_iris_tasks[TASK_WEBSRV] = PL_start_task(TASK_WEBSRV, PL_websrv_thread, NULL, SCHED_BATCH, 0);

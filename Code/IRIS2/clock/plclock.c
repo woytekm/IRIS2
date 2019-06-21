@@ -55,10 +55,13 @@ void PL_clock_thread(void)
 
    time_t now;
    unsigned char timestr[11];
+   unsigned char tempstr[8];
    uint8_t flip = 0, some_alarms_active, prev_hour = 25,i;
    alarm_data_t *alarm;
    uint8_t TTS_thread_msg[2];
    uint8_t x_first,x_second,x_third,x_fourth;
+   uint8_t y_clock_pos;
+   uint8_t hour_temp_swap_interval, display_hour = 1, display_temp = 0;
    
    while(1)
      {
@@ -222,40 +225,76 @@ void PL_clock_thread(void)
             sprintf(timestr,"%2d %02d",G_tm->tm_hour,G_tm->tm_min);
           }
 
-         m_clear();
+         //m_clear();
 
-         m_set_brightness(G_config.matrix_brightness);
+         if((G_config.matrix_temperature) && (G_last_weather_API_call_status == 1))
+          {
+            if(display_hour)
+             {
+              hour_temp_swap_interval++;
+              if(hour_temp_swap_interval == 6)
+                {
+                 display_hour = 0;
+                 display_temp = 1;
+                 hour_temp_swap_interval = 0;
+                }
+              }
 
-         m_setcursor(4,15);
-         mf_writechar(timestr[0],1,18,0,gfxFont);
+            if(display_temp)
+             {
+              hour_temp_swap_interval++;
+              if(hour_temp_swap_interval == 4)
+                {
+                 display_hour = 1;
+                 display_temp = 0;
+                 hour_temp_swap_interval = 0;
+                }
+             }
+           }
 
-         //if(timestr[0] == '1')
-         //  m_setcursor(18,15);
-         //else
-         //  m_setcursor(20,15);
+         m_putfillrect(1, 1, 64, 14, 0);
 
-         mf_writechar(timestr[1],1,18,0,gfxFont);
-         m_setcursor(23,15);
-         mf_writechar(timestr[2],1,18,0,gfxFont);
-         m_setcursor(31,15);
-         //if(timestr[0] == '1')
-         //  m_setcursor(32,15);
-         //else
-         //  m_setcursor(34,15);
-         mf_writechar(timestr[3],1,18,0,gfxFont);
-         mf_writechar(timestr[4],1,18,0,gfxFont);
+         if(G_config.matrix_weather)
+          y_clock_pos = 12;
+         else
+          y_clock_pos = 15;
+ 
+         if(display_hour)
+          {
+            m_setcursor(4,y_clock_pos);
+            mf_writechar(timestr[0],1,G_config.matrix_clock_color,0,gfxFont);
+            mf_writechar(timestr[1],1,G_config.matrix_clock_color,0,gfxFont);
 
-         // m_setcursor(8,29);
-         // mf_writechar('1',1,20,0,gfxFontSmall);
-         // mf_writechar('2',1,20,0,gfxFontSmall);
-         // mf_writechar('\xB0',1,20,0,gfxFontSmall);
-        
+            m_setcursor(23,y_clock_pos);
+            mf_writechar(timestr[2],1,G_config.matrix_clock_color,0,gfxFont);
+
+            m_setcursor(31,y_clock_pos);
+            mf_writechar(timestr[3],1,G_config.matrix_clock_color,0,gfxFont);
+            mf_writechar(timestr[4],1,G_config.matrix_clock_color,0,gfxFont);
+          }
+         else if(display_temp)
+          {
+            sprintf(tempstr,"%2.1fC",G_temperature);
+            m_setcursor(5,y_clock_pos);
+            mf_writechar(tempstr[0],1,G_config.matrix_clock_color,0,gfxFontSmall);
+            mf_writechar(tempstr[1],1,G_config.matrix_clock_color,0,gfxFontSmall);
+
+            m_setcursor(24,y_clock_pos);
+            mf_writechar(tempstr[2],1,G_config.matrix_clock_color,0,gfxFontSmall);
+
+            m_setcursor(32,y_clock_pos);
+            mf_writechar(tempstr[3],1,G_config.matrix_clock_color,0,gfxFontSmall);
+            mf_writechar(tempstr[4],1,G_config.matrix_clock_color,0,gfxFontSmall);
+          }
 
 
          if(some_alarms_active)
+          {
+          if(G_config.matrix_weather) 
+           PL_matrix_alarm_sign(55,1,8);
+          else
            PL_matrix_alarm_sign(55,4,8);
-
-         m_display();
+          }
        }
 
       usleep(950000);

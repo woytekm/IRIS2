@@ -4,4 +4,5 @@
 #define MATRIX_ANALYSER_ON 1
 #define MATRIX_ANALYSER_OFF 2
 
+void PL_matrix_display_thread(void);
 

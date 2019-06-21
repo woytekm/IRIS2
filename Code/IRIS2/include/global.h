@@ -280,7 +280,10 @@ char G_current_stream_META[1024];
 #define TASK_MATRIX             19
 #define TASK_AMP_HW_CTRL        20
 #define TASK_BTCTRL             21
-#define TASK_BTPLAYERCTRL        22
+#define TASK_BTPLAYERCTRL       22
+#define TASK_MATRIX_DISPLAY     23
+#define TASK_WEATHER_API        24
+#define TASK_WEATHER_SCENERY    25
 
 
 
@@ -354,9 +357,23 @@ typedef struct _iris_config_t {
     uint8_t FFT_base_color;
     uint8_t FFT_marker_color;
     uint8_t FFT_gradient_color;
+    uint8_t matrix_clock_color;
+    uint8_t get_weather;
+    uint8_t matrix_temperature;
+    uint8_t matrix_weather;
+    unsigned char weather_location[255];
+    unsigned char rapidapi_weather_key[255];
 } iris_config_t;
 
 iris_config_t G_config;
+
+uint8_t G_last_weather_API_call_status;
+double G_temperature;
+uint8_t G_windspeed;
+typedef enum {OVERCAST_CLOUDS, BROKEN_CLOUDS, SCATTERED_CLOUDS, FEW_CLOUDS, CLEAR_SKY, 
+                LIGHT_RAIN, MODERATE_RAIN, HEAVY_RAIN, STORM, LIGHT_SNOW, MODERATE_SNOW, HEAVY_SNOW, RAIN_SNOW, FOG, UNKNOWN} weather_t; 
+
+weather_t G_weather;
 
 typedef struct _rss_feed_t {
   unsigned char *name;

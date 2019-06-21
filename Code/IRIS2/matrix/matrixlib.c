@@ -38,6 +38,36 @@
 * external routines
 */ 
 
+void display_bitmap(uint8_t *bitmap)
+ {
+  uint8_t x,y;
+  uint16_t i;
+
+  i = 0;
+
+  for(y=1; y<33; y++)
+   for(x=1; x<65; x++)
+    {
+      m_putpixel(x,y,bitmap[i]);
+      i++;
+    }
+ }
+
+void display_bitmap_at(uint8_t *bitmap, uint8_t xsize, uint8_t ysize, uint8_t xpos, uint8_t ypos)
+ {
+   uint16_t i;
+
+   i = 0;
+   uint8_t x,y;
+
+   for(y=ypos; y<ysize+ypos; y++)
+    for(x=xpos; x<xsize+xpos; x++)
+      {
+       m_putpixel(x,y,bitmap[i]);
+       i++;
+      }
+ }
+
 void m_clear()
  {
   bzero(&mi_matrix_edit_buffer,MATRIXBUFLEN);

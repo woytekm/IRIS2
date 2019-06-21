@@ -51,6 +51,9 @@ void PL_init(void)
 
   G_amp_detected = 0;
 
+  G_weather = UNKNOWN;
+  G_last_weather_API_call_status = 0;
+
   G_config.HW_volume_L = AMP_INIT_SATELLITE_GAIN;
   G_config.HW_volume_R = AMP_INIT_SATELLITE_GAIN;
   G_config.HW_volume_S = AMP_INIT_SUBWOOFER_GAIN;
@@ -108,6 +111,12 @@ void PL_init(void)
   G_config.FFT_base_color = 24;
   G_config.FFT_marker_color = 19;
   G_config.FFT_gradient_color = 0;
+  G_config.matrix_clock_color = 18;
+  G_config.get_weather = 0;
+  G_config.matrix_temperature = 0;
+  G_config.matrix_weather = 0;
+  strcpy(G_config.weather_location," ");
+  strcpy(G_config.rapidapi_weather_key," ");
 
   PL_debug("PL_init: global variables inited");
 

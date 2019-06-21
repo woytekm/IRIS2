@@ -100,7 +100,6 @@ void PL_matrix_analyser_display(float *fft_buffer, uint8_t mode, uint8_t color_s
       m_putpixel(i,(31-val),G_config.FFT_marker_color);
      }
    }
-  m_display();
 
  }
 
@@ -111,9 +110,6 @@ void PL_matrix_analyser_thread(void)
   float fft[512];
   uint16_t i;
   uint8_t cleared = 0;
-
-  m_init();
-  m_set_brightness(G_config.matrix_brightness);
 
   G_matrix_analyser_mode = MATRIX_ANALYSER_MODE_MONO_HOLD;
   G_matrix_mode = MATRIX_MODE_CLOCK;
@@ -126,7 +122,6 @@ void PL_matrix_analyser_thread(void)
      if((((G_player_mode != PLAYER_STREAM)&&(!G_config.bt_sink)) && (!cleared)) || G_clear_matrix )
       {
        m_clear();
-       m_display();
        bzero(&fft,sizeof(fft));
        cleared = 1;
        G_clear_matrix = 0;
@@ -143,15 +138,12 @@ void PL_matrix_analyser_thread(void)
        if(G_matrix_analyser_mode == MATRIX_ANALYSER_MODE_STEREO_HOLD)
         BASS_ChannelGetData(G_stream_chan, fft, BASS_DATA_FFT512|BASS_DATA_FFT_INDIVIDUAL);
 
-       m_set_brightness(G_config.matrix_brightness);
-
        PL_matrix_analyser_display(fft,G_matrix_analyser_mode,G_matrix_analyser_color_scheme);
        cleared = 0;
       }
      else if(G_matrix_mode == MATRIX_MODE_BLANK)
       {
        m_clear();
-       m_display();
        bzero(&fft,sizeof(fft));
       }
      // else if(G_matrix_mode == MATRIX_MODE_CLOCK) - serviced in plclock.c
