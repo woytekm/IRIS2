@@ -168,6 +168,10 @@ void PL_weather_api_thread(void)
      G_config.matrix_weather = 0;
      G_config.matrix_temperature = 0;
    }
+  else if(G_config.get_weather)
+   {
+     PL_debug("PL_weather_api_thread: enabling weather feature for %s.",G_config.weather_location);
+   }
 
   while(1)
    {
