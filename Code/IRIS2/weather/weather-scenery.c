@@ -17,6 +17,7 @@
 #include "scattered-clouds-day-16F.h"
 #include "scattered-clouds-night-16F.h"
 #include "storm-16f.h"
+#include "snow-16f.h"
 #include "no-weather-1f.h"
 
 
@@ -45,7 +46,7 @@ void PL_weather_scenery_thread(void)
            switch(G_weather)
             { 
              case FEW_CLOUDS: 
-              if((G_tm->tm_hour > 20) && (G_tm->tm_hour < 5))  
+              if((G_tm->tm_hour > 20) || (G_tm->tm_hour < 5))  
                {
                  display_bitmap_at(few_clouds_night_32f_data[i++],FEW_CLOUDS_NIGHT_32F_FRAME_WIDTH, FEW_CLOUDS_NIGHT_32F_FRAME_HEIGHT,1,17);
                  if(i>=FEW_CLOUDS_NIGHT_32F_FRAME_COUNT) i = 0;
@@ -59,7 +60,7 @@ void PL_weather_scenery_thread(void)
 
              case BROKEN_CLOUDS:
 
-               if((G_tm->tm_hour > 20) && (G_tm->tm_hour < 5))
+               if((G_tm->tm_hour > 20) || (G_tm->tm_hour < 5))
                 {
                   display_bitmap_at(broken_clouds_night_16f_data[i++],BROKEN_CLOUDS_NIGHT_16F_FRAME_WIDTH, BROKEN_CLOUDS_NIGHT_16F_FRAME_HEIGHT,1,17);
                   if(i>=BROKEN_CLOUDS_NIGHT_16F_FRAME_COUNT) i = 0;
@@ -72,7 +73,7 @@ void PL_weather_scenery_thread(void)
               break;
 
              case CLEAR_SKY: 
-               if((G_tm->tm_hour > 20) && (G_tm->tm_hour < 5))
+               if((G_tm->tm_hour > 20) || (G_tm->tm_hour < 5))
                 {
                   display_bitmap_at(clear_sky_night_11f_data[i++],CLEAR_SKY_NIGHT_11F_FRAME_WIDTH, CLEAR_SKY_NIGHT_11F_FRAME_HEIGHT,1,17);
                   if(i>=CLEAR_SKY_NIGHT_11F_FRAME_COUNT) i = 0;
@@ -104,13 +105,18 @@ void PL_weather_scenery_thread(void)
                    if(i>=STORM_16F_FRAME_COUNT) i = 0;
                break;
 
+              case SNOW:
+                   display_bitmap_at(snow_16f_data[i++],SNOW_16F_FRAME_WIDTH, SNOW_16F_FRAME_HEIGHT,1,17);
+                    if(i>=SNOW_16F_FRAME_COUNT) i = 0;
+                break;
+
               case OVERCAST_CLOUDS:
                   display_bitmap_at(overcast_clouds_16f_data[i++],OVERCAST_CLOUDS_16F_FRAME_WIDTH, OVERCAST_CLOUDS_16F_FRAME_HEIGHT,1,17);
                   if(i>=OVERCAST_CLOUDS_16F_FRAME_COUNT) i = 0;
               break;
 
               case SCATTERED_CLOUDS:
-               if((G_tm->tm_hour > 20) && (G_tm->tm_hour < 5))
+               if((G_tm->tm_hour > 20) || (G_tm->tm_hour < 5))
                 {
                   display_bitmap_at(scattered_clouds_night_16f_data[i++],SCATTERED_CLOUDS_NIGHT_16F_FRAME_WIDTH, SCATTERED_CLOUDS_NIGHT_16F_FRAME_HEIGHT,1,17);
                   if(i>=SCATTERED_CLOUDS_NIGHT_16F_FRAME_COUNT) i = 0;

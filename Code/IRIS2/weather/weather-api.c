@@ -136,6 +136,8 @@ weather_t PL_parse_weather_description(const char *description)
    return STORM;
   else if(strstr(description,"fog") != NULL)
    return FOG;
+  else if(strstr(description,"snow") != NULL)
+   return SNOW;
   else return UNKNOWN;
 
  }

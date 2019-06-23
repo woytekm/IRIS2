@@ -371,7 +371,7 @@ uint8_t G_last_weather_API_call_status;
 double G_temperature;
 uint8_t G_windspeed;
 typedef enum {OVERCAST_CLOUDS, BROKEN_CLOUDS, SCATTERED_CLOUDS, FEW_CLOUDS, CLEAR_SKY, 
-                LIGHT_RAIN, MODERATE_RAIN, HEAVY_RAIN, STORM, LIGHT_SNOW, MODERATE_SNOW, HEAVY_SNOW, RAIN_SNOW, FOG, UNKNOWN} weather_t; 
+                LIGHT_RAIN, MODERATE_RAIN, HEAVY_RAIN, STORM, LIGHT_SNOW, SNOW, MODERATE_SNOW, HEAVY_SNOW, RAIN_SNOW, FOG, UNKNOWN} weather_t; 
 
 weather_t G_weather;
 
