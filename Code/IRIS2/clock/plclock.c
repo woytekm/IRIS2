@@ -2,6 +2,9 @@
 #include "WEH001602-lib.h"
 #include "tts.h"
 #include "matrixlib.h"
+#include "rain-icon.h"
+
+
 
 alarm_data_t *PL_new_alarm(uint8_t hour, uint8_t minute, uint8_t days_of_week, uint8_t al_state, uint8_t al_type, uint8_t sound_idx)
  {
@@ -295,6 +298,15 @@ void PL_clock_thread(void)
           else
            PL_matrix_alarm_sign(55,4,8);
           }
+
+         if((G_last_weather_API_call_status == 1) && (G_config.matrix_weather == 1))
+          {
+          if(G_will_rain_in_12h == 1)
+           m_display_bitmap_at(rain_icon_data[0],7,8,55,6);
+          //else
+          // m_putfillrect(58, 10, 64, 17, 0);
+          }
+
        }
 
       usleep(950000);

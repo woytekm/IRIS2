@@ -53,6 +53,7 @@ void PL_init(void)
 
   G_weather = UNKNOWN;
   G_last_weather_API_call_status = 0;
+  G_will_rain_in_12h = 0;
 
   G_config.HW_volume_L = AMP_INIT_SATELLITE_GAIN;
   G_config.HW_volume_R = AMP_INIT_SATELLITE_GAIN;

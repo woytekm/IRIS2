@@ -38,7 +38,7 @@
 * external routines
 */ 
 
-void display_bitmap(uint8_t *bitmap)
+void m_display_bitmap(uint8_t *bitmap)
  {
   uint8_t x,y;
   uint16_t i;
@@ -53,7 +53,7 @@ void display_bitmap(uint8_t *bitmap)
     }
  }
 
-void display_bitmap_at(uint8_t *bitmap, uint8_t xsize, uint8_t ysize, uint8_t xpos, uint8_t ypos)
+void m_display_bitmap_at(uint8_t *bitmap, uint8_t xsize, uint8_t ysize, uint8_t xpos, uint8_t ypos)
  {
    uint16_t i;
 

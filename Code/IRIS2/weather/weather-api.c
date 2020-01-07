@@ -78,8 +78,8 @@ static char *weather_api_request(const char *url)
     status = curl_easy_perform(curl);
     if(status != 0)
     {
-        PL_debug("PL_weather_api_thread: error: unable to request data from %s:\n", url);
-        PL_debug("PL_weather_api_thread: curl error: %s\n", curl_easy_strerror(status));
+        PL_debug("PL_weather_api_thread: error: unable to request data from %s:", url);
+        PL_debug("PL_weather_api_thread: curl error: %s", curl_easy_strerror(status));
         goto error;
     }
 
@@ -146,13 +146,13 @@ weather_t PL_parse_weather_description(const char *description)
 void PL_weather_api_thread(void)
  {
 
-  uint8_t failed = 0;;
+  uint8_t failed = 0,i;
   char url[URL_SIZE];
   char *api_return_data, *key;
   double api_3h_temp, api_3h_windspeed;
-  const char *api_3h_weather_desc;
+  const char *api_3h_weather_desc, *weather_desc_str_tmp;
 
-  json_t *root, *forecast_list, *forecast_3h, *forecast_main_3h, *forecast_weather_3h, *forecast_clouds_3h, *forecast_wind_3h, *weather_array;
+  json_t *root, *forecast_list, *forecast_3h, *forecast_main_3h, *forecast_weather_3h, *forecast_clouds_3h, *forecast_wind_3h, *weather_array, *forecast_tmp, *weather_desc_tmp, *forecast_desc_tmp;
   json_t *temperature, *wind_speed, *weather_description;
 
   json_error_t error;
@@ -182,7 +182,8 @@ void PL_weather_api_thread(void)
 
     if(failed) 
      {
-       PL_debug("PL_weather_api_thread: failed to get proper Open WeatherMap response via Rapid API. Sleeping 10 mins.");
+       PL_debug("PL_weather_api_thread: failed to get proper Open Weather Map response via Rapid API. Sleeping 10 mins.");
+       G_will_rain_in_12h = 0;
        G_last_weather_API_call_status = 0;
        G_weather = UNKNOWN;
        G_temperature = 0;
@@ -218,7 +219,7 @@ void PL_weather_api_thread(void)
 
     if(!json_is_object(root))
     {
-        PL_debug("PL_weather_api_thread: error: json root is not a json object\n");
+        PL_debug("PL_weather_api_thread: error: json root is not a json object.");
         failed = 1;
         json_decref(root);
         continue;
@@ -229,7 +230,7 @@ void PL_weather_api_thread(void)
     
     if(!json_is_array(forecast_list))
      {
-      PL_debug("PL_weather_api_thread: error: forecast_list is not a json array object\n");
+      PL_debug("PL_weather_api_thread: error: forecast_list is not a json array object.");
       failed = 1;
       continue;
      }
@@ -247,7 +248,7 @@ void PL_weather_api_thread(void)
 
     if(!json_is_real(temperature) || !json_is_real(wind_speed) || !json_is_string(weather_description))
      {
-      PL_debug("PL_weather_api_thread: error: failed to get JSON keys for 3h forecast.\n");
+      PL_debug("PL_weather_api_thread: error: failed to get JSON keys for 3h forecast.");
       failed = 1;
       continue;
      }
@@ -261,6 +262,20 @@ void PL_weather_api_thread(void)
     G_temperature = api_3h_temp;
     G_windspeed = round(api_3h_windspeed);
     G_weather = PL_parse_weather_description(api_3h_weather_desc);
+
+    G_will_rain_in_12h = 0;
+
+    // check if it will rain in next 12h
+
+    for(i=0; i < 5; i++)
+     {
+      forecast_tmp = json_array_get(forecast_list,i); 
+      forecast_desc_tmp = json_array_get(json_object_get(forecast_tmp,"weather"),0);
+      weather_desc_tmp = json_object_get(forecast_desc_tmp,"description");
+      weather_desc_str_tmp = json_string_value(weather_desc_tmp);
+      if(strstr(weather_desc_str_tmp,"rain") != NULL)
+        G_will_rain_in_12h = 1;
+     }
 
     json_decref(root);
  
