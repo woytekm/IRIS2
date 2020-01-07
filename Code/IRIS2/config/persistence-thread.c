@@ -25,7 +25,10 @@ uint8_t PL_load_persistence_data(iris_persistence_data_t *persistence_data)
 void PL_keep_persistence(iris_persistence_data_t *persistence_data)
  {
 
-   G_stream_index = persistence_data->stream_index;
+   // if saved stream index is higher than overall stream count loaded from config file - don't restore that 
+   if(G_stream_count > persistence_data->stream_index)
+     G_stream_index = persistence_data->stream_index;
+
    G_rss_feed_index = persistence_data->rss_index;
    G_config.volume_level = persistence_data->volume_level;
    G_display_mode_upper_row = persistence_data->display_mode_1;
