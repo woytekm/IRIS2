@@ -9,7 +9,8 @@
 
 #include "global.h"
 
-#define API_URL "https://community-open-weather-map.p.rapidapi.com/forecast?q=%s&units=metric"
+//#define API_URL "https://community-open-weather-map.p.rapidapi.com/forecast?q=%s&units=metric"
+#define API_URL "https://api.openweathermap.org/data/2.5/forecast?q=%s&units=metric&appid=%s"
 #define URL_SIZE 256
 
 #define BUFFER_SIZE  (256 * 1024)  
@@ -64,11 +65,11 @@ static char *weather_api_request(const char *url)
 
     curl_easy_setopt(curl, CURLOPT_URL, url);
 
-    sprintf(rapidapi_key_header,"X-RapidAPI-Key: %s",G_config.rapidapi_weather_key);
+    //sprintf(rapidapi_key_header,"X-RapidAPI-Key: %s",G_config.rapidapi_weather_key);
     /* GitHub commits API v3 requires a User-Agent header */
     headers = curl_slist_append(headers, "User-Agent: IRIS2");
-    headers = curl_slist_append(headers, "X-RapidAPI-Host: community-open-weather-map.p.rapidapi.com");
-    headers = curl_slist_append(headers, rapidapi_key_header);
+    //headers = curl_slist_append(headers, "X-RapidAPI-Host: community-open-weather-map.p.rapidapi.com");
+    //headers = curl_slist_append(headers, rapidapi_key_header);
     
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
@@ -193,7 +194,7 @@ void PL_weather_api_thread(void)
 
     if((G_config.get_weather) && (strlen(G_config.weather_location) > 5))
     {
-     snprintf(url, URL_SIZE, API_URL, G_config.weather_location);  
+     snprintf(url, URL_SIZE, API_URL, G_config.weather_location,G_config.rapidapi_weather_key);  
      api_return_data = weather_api_request(url);
 
      if(!api_return_data)
